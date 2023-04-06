@@ -1,4 +1,4 @@
-package net.lawaxi.models;
+package net.lawaxi.lottery.models;
 
 import java.util.ArrayList;
 import java.util.List;

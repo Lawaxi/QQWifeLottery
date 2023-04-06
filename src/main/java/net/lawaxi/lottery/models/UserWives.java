@@ -1,4 +1,4 @@
-package net.lawaxi.models;
+package net.lawaxi.lottery.models;
 
 import cn.hutool.json.JSONObject;
 

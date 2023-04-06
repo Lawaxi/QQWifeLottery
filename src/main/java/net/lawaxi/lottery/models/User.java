@@ -1,4 +1,4 @@
-package net.lawaxi.models;
+package net.lawaxi.lottery.models;
 
 public class User {
     public final Long g;

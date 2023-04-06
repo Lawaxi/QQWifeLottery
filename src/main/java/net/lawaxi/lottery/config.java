@@ -1,11 +1,11 @@
-package net.lawaxi;
+package net.lawaxi.lottery;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.Setting;
-import net.lawaxi.models.User;
-import net.lawaxi.models.UserWives;
+import net.lawaxi.lottery.models.UserWives;
+import net.lawaxi.lottery.models.User;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -50,10 +50,13 @@ public class config {
 
         for (Object o : JSONUtil.parseArray(s.getByGroup("wives", "wives")).toArray()) {
             JSONObject o1 = JSONUtil.parseObj(o);
+            if(o1.keySet() == null)
+                continue;
+
             UserWives w = new UserWives();
             wives.add(w);
             for(String key : o1.keySet()){
-                w.put(Long.getLong(key), o1.getInt(key));
+                w.put(Long.valueOf(key), o1.getInt(key));
             }
         }
     }

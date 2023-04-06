@@ -1,8 +1,8 @@
-package net.lawaxi;
+package net.lawaxi.lottery;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.util.RandomUtil;
-import net.lawaxi.models.UserWifeReport;
+import net.lawaxi.lottery.models.UserWifeReport;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.NormalMember;

@@ -1,4 +1,4 @@
-package net.lawaxi;
+package net.lawaxi.lottery;
 
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
@@ -9,7 +9,7 @@ public final class WifeOttery extends JavaPlugin {
     public static config config;
 
     private WifeOttery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery", "0.1.2")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery", "0.1.3")
                 .name("来个老婆")
                 .author("小d")
                 .build());

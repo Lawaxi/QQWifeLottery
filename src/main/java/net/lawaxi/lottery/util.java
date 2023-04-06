@@ -1,4 +1,4 @@
-package net.lawaxi;
+package net.lawaxi.lottery;
 
 import cn.hutool.core.date.DateUnit;
 
