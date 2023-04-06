@@ -61,7 +61,7 @@ public class Listener  extends SimpleListenerHost {
         int q = RandomUtil.randomInt(1,100);
         glt.put(sender.getId(), new Date());
         if(q > 79)
-            Laigelaopo.config.addNewWive(group.getId(),sender.getId(),mem.getId());
+            WifeOttery.config.addNewWive(group.getId(),sender.getId(),mem.getId());
 
         group.sendMessage(new At(sender.getId())
                 .plus(" 今日老婆："
@@ -74,7 +74,7 @@ public class Listener  extends SimpleListenerHost {
     }
 
     private void woDeLaoPo(Member sender, Group group){
-        UserWifeReport report = new UserWifeReport(Laigelaopo.config.getUserWives(group.getId(),sender.getId()));
+        UserWifeReport report = new UserWifeReport(WifeOttery.config.getUserWives(group.getId(),sender.getId()));
         if(report.getWifeTotal()==0)
         {
             group.sendMessage(new At(sender.getId()).plus("\n你还没有老婆~ 情愫达到80%才可以带走捏"));

@@ -6,7 +6,6 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.Setting;
 import net.lawaxi.models.User;
 import net.lawaxi.models.UserWives;
-import net.mamoe.mirai.console.plugin.PluginManager;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +16,8 @@ public class config {
 
     private final File config;
     private final Setting s;
+    private String[] sysOttery = {};
+    private String[] sysData = {};
     private List<User> users = new ArrayList<>();
     private List<UserWives> wives = new ArrayList<>();
 
@@ -27,6 +28,8 @@ public class config {
         if (!config.exists()) {
             FileUtil.touch(config);
 
+            s.setByGroup("ottery","system","来个老婆,换个老婆");
+            s.setByGroup("data","system","我的老婆");
             s.setByGroup("users", "users", "[]");
             s.setByGroup("wives", "wives", "[]");
 
@@ -36,6 +39,9 @@ public class config {
     }
 
     private void load(){
+
+        sysOttery = s.getStrings("ottery","system");
+        sysData = s.getStrings("data","system");
 
         for (Object o : JSONUtil.parseArray(s.getByGroup("users", "users")).toArray()) {
             JSONObject o1 = JSONUtil.parseObj(o);
@@ -56,6 +62,14 @@ public class config {
         s.setByGroup("users","users", listToJson(users));
         s.setByGroup("wives","wives", listToJson(wives));
         s.store();
+    }
+
+    public String[] getSysOttery() {
+        return sysOttery;
+    }
+
+    public String[] getSysData() {
+        return sysData;
     }
 
     private String listToJson(List l){

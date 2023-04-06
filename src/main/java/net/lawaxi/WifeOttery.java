@@ -4,12 +4,12 @@ import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 import net.mamoe.mirai.event.GlobalEventChannel;
 
-public final class Laigelaopo extends JavaPlugin {
-    public static final Laigelaopo INSTANCE = new Laigelaopo();
+public final class WifeOttery extends JavaPlugin {
+    public static final WifeOttery INSTANCE = new WifeOttery();
     public static config config;
 
-    private Laigelaopo() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.laigelaopo", "0.1.0")
+    private WifeOttery() {
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery", "0.1.1")
                 .name("来个老婆")
                 .author("小d")
                 .build());
