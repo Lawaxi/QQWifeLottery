@@ -25,23 +25,27 @@ public class Listener  extends SimpleListenerHost {
         Member sender = event.getSender();
         Group group = event.getGroup();
         String message = event.getMessage().contentToString();
-
-        switch (message){
-            case "来个老婆":
-            case "换个老婆":
-                laiGeLaoPo(sender, group);
-                break;
-            case "我的老婆":
-                try {
-                    woDeLaoPo(sender, group);
-                }catch (Exception e)
-                {e.printStackTrace();}
-                break;
-            case "来个老婆 debug":
-                lastTime.get(group.getId()).remove(sender.getId());
-        }
+        testLaiGeLaoPo(message,sender,group);
 
         return ListeningStatus.LISTENING;
+    }
+
+    private void testLaiGeLaoPo(String message, Member sender, Group group){
+        for(String o : WifeOttery.INSTANCE.config.getSysOttery())
+        {
+            if(message.equals(o)) {
+                laiGeLaoPo(sender, group);
+                return;
+            }
+        }
+
+        for(String o : WifeOttery.INSTANCE.config.getSysData())
+        {
+            if(message.equals(o)) {
+                woDeLaoPo(sender, group);
+                return;
+            }
+        }
     }
 
     private void laiGeLaoPo(Member sender, Group group){
