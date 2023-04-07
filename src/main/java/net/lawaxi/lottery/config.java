@@ -4,8 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.Setting;
-import net.lawaxi.lottery.models.UserWives;
 import net.lawaxi.lottery.models.User;
+import net.lawaxi.lottery.models.UserWives;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -16,8 +16,12 @@ public class config {
 
     private final File config;
     private final Setting s;
-    private String[] sysOttery = {};
+    private String[] sysLottery = {};
     private String[] sysData = {};
+    private String sysLotteryOut;
+    private String sysDataOut;
+    private String sysDataVoidOut;
+
     private List<User> users = new ArrayList<>();
     private List<UserWives> wives = new ArrayList<>();
 
@@ -28,8 +32,11 @@ public class config {
         if (!config.exists()) {
             FileUtil.touch(config);
 
-            s.setByGroup("ottery","system","来个老婆,换个老婆");
+            s.setByGroup("lottery","system","来个老婆,换个老婆");
             s.setByGroup("data","system","我的老婆");
+            s.setByGroup("lotteryOut","system"," 今日老婆：%s | 情愫：%d%% %s\\n%s后可更换");
+            s.setByGroup("dataOut","system","\\n累计带走%d人 共%d次\\n带走次数御三：%s");
+            s.setByGroup("dataVoidOut","system","\n你还没有老婆~ 情愫达到80%才可以带走捏");
             s.setByGroup("users", "users", "[]");
             s.setByGroup("wives", "wives", "[]");
 
@@ -40,8 +47,16 @@ public class config {
 
     private void load(){
 
-        sysOttery = s.getStrings("ottery","system");
+        sysLottery = s.getStrings("lottery","system");
         sysData = s.getStrings("data","system");
+        if(sysLottery == null)
+            sysLottery = new String[]{"来个老婆","换个老婆"};
+        if(sysData == null)
+            sysData = new String[]{"我的老婆"};
+
+        sysLotteryOut = s.getStr("lotteryOut","system"," 今日老婆：%s | 情愫：%d%% %s\\n%s后可更换");
+        sysDataOut = s.getStr("dataOut","system","\\n累计带走%d人 共%d次\\n带走次数御三：%s");
+        sysDataVoidOut = s.getStr("dataVoidOut","system","\n你还没有老婆~ 情愫达到80%才可以带走捏");
 
         for (Object o : JSONUtil.parseArray(s.getByGroup("users", "users")).toArray()) {
             JSONObject o1 = JSONUtil.parseObj(o);
@@ -67,12 +82,24 @@ public class config {
         s.store();
     }
 
-    public String[] getSysOttery() {
-        return sysOttery;
+    public String[] getSysLottery() {
+        return sysLottery;
     }
 
     public String[] getSysData() {
         return sysData;
+    }
+
+    public String getSysLotteryOut() {
+        return sysLotteryOut;
+    }
+
+    public String getSysDataOut() {
+        return sysDataOut;
+    }
+
+    public String getSysDataVoidOut() {
+        return sysDataVoidOut;
     }
 
     private String listToJson(List l){

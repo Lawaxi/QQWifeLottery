@@ -31,7 +31,7 @@ public class Listener  extends SimpleListenerHost {
     }
 
     private void testLaiGeLaoPo(String message, Member sender, Group group){
-        for(String o : WifeOttery.INSTANCE.config.getSysOttery())
+        for(String o : WifeOttery.INSTANCE.config.getSysLottery())
         {
             if(message.equals(o)) {
                 laiGeLaoPo(sender, group);
@@ -62,26 +62,27 @@ public class Listener  extends SimpleListenerHost {
         }
 
         NormalMember mem = RandomUtil.randomEle(new ArrayList<>(group.getMembers().delegate));
-        int q = RandomUtil.randomInt(1,100);
         glt.put(sender.getId(), new Date());
-        if(q > 79)
+        int q;
+        if(RandomUtil.randomBoolean()) {
+            q = RandomUtil.randomInt(80, 100);
             WifeOttery.config.addNewWive(group.getId(),sender.getId(),mem.getId());
+        }else q = RandomUtil.randomInt(1,79);
+
 
         group.sendMessage(new At(sender.getId())
-                .plus(" 今日老婆："
-                        +(mem.getNameCard().equals("") ?  mem.getNick() : mem.getNameCard()+"("+mem.getNick()+")")
-                        +" | 情愫："
-                        +q
-                        +"% "
-                        +util.recommend(q)
-                        +"\n"+util.getChangingTime(0l)+"后可更换"));
+                .plus(String.format(WifeOttery.config.getSysLotteryOut(),
+                        (mem.getNameCard().equals("") ?  mem.getNick() : mem.getNameCard()+"("+mem.getNick()+")")
+                        ,q
+                        ,util.recommend(q)
+                        ,util.getChangingTime(0l))));
     }
 
     private void woDeLaoPo(Member sender, Group group){
         UserWifeReport report = new UserWifeReport(WifeOttery.config.getUserWives(group.getId(),sender.getId()));
         if(report.getWifeTotal()==0)
         {
-            group.sendMessage(new At(sender.getId()).plus("\n你还没有老婆~ 情愫达到80%才可以带走捏"));
+            group.sendMessage(new At(sender.getId()).plus(WifeOttery.config.getSysDataVoidOut()));
             return;
         }
 
@@ -96,8 +97,9 @@ public class Listener  extends SimpleListenerHost {
         }
 
 
-        group.sendMessage(new At(sender.getId()).plus(
-                "\n累计带走"+report.getWifeTotal()+"人 共"+report.getTotal()+"次\n"
-                        +"带走次数御三：\n"+yuSan.substring(0,yuSan.length()-3)));
+        group.sendMessage(new At(sender.getId()).plus(String.format(WifeOttery.config.getSysDataOut(),
+                report.getWifeTotal()
+                ,report.getTotal()+"次\n"
+                ,yuSan.substring(0,yuSan.length()-3))));
     }
 }
