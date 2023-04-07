@@ -99,7 +99,7 @@ public class Listener  extends SimpleListenerHost {
 
         group.sendMessage(new At(sender.getId()).plus(String.format(WifeOttery.config.getSysDataOut(),
                 report.getWifeTotal()
-                ,report.getTotal()+"次\n"
+                ,report.getTotal()
                 ,yuSan.substring(0,yuSan.length()-3))));
     }
 }
