@@ -36,7 +36,7 @@ public class config {
             s.setByGroup("data","system","我的老婆");
             s.setByGroup("lotteryOut","system"," 今日老婆：%s | 情愫：%d%% %s\\n%s后可更换");
             s.setByGroup("dataOut","system","\\n累计带走%d人 共%d次\\n带走次数御三：%s");
-            s.setByGroup("dataVoidOut","system","\n你还没有老婆~ 情愫达到80%才可以带走捏");
+            s.setByGroup("dataVoidOut","system","\\n你还没有老婆~ 情愫达到80%才可以带走捏");
             s.setByGroup("users", "users", "[]");
             s.setByGroup("wives", "wives", "[]");
 
@@ -54,9 +54,9 @@ public class config {
         if(sysData == null)
             sysData = new String[]{"我的老婆"};
 
-        sysLotteryOut = s.getStr("lotteryOut","system"," 今日老婆：%s | 情愫：%d%% %s\\n%s后可更换");
-        sysDataOut = s.getStr("dataOut","system","\\n累计带走%d人 共%d次\\n带走次数御三：%s");
-        sysDataVoidOut = s.getStr("dataVoidOut","system","\n你还没有老婆~ 情愫达到80%才可以带走捏");
+        sysLotteryOut = s.getStr("lotteryOut","system"," 今日老婆：%s | 情愫：%d%% %s\\n%s后可更换").replace("\\n","\n");
+        sysDataOut = s.getStr("dataOut","system","\\n累计带走%d人 共%d次\\n带走次数御三：%s").replace("\\n","\n");
+        sysDataVoidOut = s.getStr("dataVoidOut","system","\\n你还没有老婆~ 情愫达到80%才可以带走捏").replace("\\n","\n");
 
         for (Object o : JSONUtil.parseArray(s.getByGroup("users", "users")).toArray()) {
             JSONObject o1 = JSONUtil.parseObj(o);
