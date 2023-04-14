@@ -44,7 +44,7 @@ public class config {
             s.setByGroup("data","system","我的老婆");
             s.setByGroup("users", "users", "[]");
             s.setByGroup("wives", "users", "[]");
-            s.setByGroup("senses", "wives", "{}");
+            s.setByGroup("sense", "wives", "{}");
             s.setByGroup("allowGroups","permission","");
 
             s.store();
@@ -68,7 +68,7 @@ public class config {
         if(sysData == null)
             sysData = new String[]{"我的老婆"};
 
-        this.allowGroup = s.getStrings("allowGroup","permission");
+        this.allowGroup = s.getStrings("allowGroups","permission");
         if(sysData == null)
             sysData = new String[]{};
 
