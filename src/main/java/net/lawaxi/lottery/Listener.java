@@ -112,7 +112,7 @@ public class Listener  extends SimpleListenerHost {
         group.sendMessage(m.plus(
                 (mem.getStr("i").equals("0") ? "" : "\n口袋ID: "+ mem.getStr("i"))+"\n"
                         +util.getChangingTime(0l)+"后可更换"
-                        +"\n当前情愫王："+(senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ?  senseFrom.getNick() : senseFrom.getNameCard()+"("+senseFrom.getNick()+")")) +"["+she.getSenseInGroup(group.getId())+"]"));
+                        +"\n当前情愫王："+(senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ?  senseFrom.getNick() : senseFrom.getNameCard()+"("+senseFrom.getNick()+")")) +" ["+she.getSenseInGroup(group.getId())+"%]"));
     }
 
     public InputStream getRes(String resLoc) {
