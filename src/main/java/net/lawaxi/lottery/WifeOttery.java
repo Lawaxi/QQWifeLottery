@@ -9,7 +9,7 @@ public final class WifeOttery extends JavaPlugin {
     public static config config;
 
     private WifeOttery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.4-incompleted-test2")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.6-test1")
                 .name("来个老婆48成员版")
                 .author("小d")
                 .build());
@@ -17,7 +17,7 @@ public final class WifeOttery extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        this.config = new config(resolveConfigFile("config.setting"),
+        config = new config(resolveConfigFile("config.setting"),
                 resolveConfigFile("star_data"));
         GlobalEventChannel.INSTANCE.registerListenerHost(new Listener());
     }

@@ -6,8 +6,10 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import net.lawaxi.lottery.models.UserWifeReport;
+import net.lawaxi.lottery.models.Wife;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
+import net.mamoe.mirai.contact.NormalMember;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.ListeningStatus;
 import net.mamoe.mirai.event.SimpleListenerHost;
@@ -26,12 +28,15 @@ public class Listener  extends SimpleListenerHost {
 
     @EventHandler()
     public ListeningStatus onGroupMessage(GroupMessageEvent event) {
-        Member sender = event.getSender();
         Group group = event.getGroup();
-        String message = event.getMessage().contentToString();
-        testLaiGeLaoPo(message,sender,group);
-        if(message.equals("update_star_data")){
-            group.sendMessage(new At(sender.getId()).plus("已更新成员列表，当前数据总数 "+WifeOttery.config.downloadStarData()+" 人"));
+        if(WifeOttery.config.doesGroupAllowed(group.getId())) {
+            Member sender = event.getSender();
+            String message = event.getMessage().contentToString();
+            testLaiGeLaoPo(message, sender, group);
+            if (message.equals("update_star_data")) {
+                group.sendMessage(new At(sender.getId()).plus("已更新成员列表，当前数据总数 " + WifeOttery.config.downloadStarData() + " 人"));
+            }
+
         }
 
         return ListeningStatus.LISTENING;
@@ -64,7 +69,7 @@ public class Listener  extends SimpleListenerHost {
         if(glt.containsKey(sender.getId())){
             long between = new Date().getTime() - ((Date) glt.get(sender.getId())).getTime();
             if(between < DateUnit.HOUR.getMillis()*2){
-                group.sendMessage(new At(sender.getId()).plus(util.getChangingTime(between)+"后可更换，在等等吧"));
+                group.sendMessage(new At(sender.getId()).plus(util.getChangingTime(between)+"后可更换，再等等吧"));
                 return;
             }
         }
@@ -73,17 +78,24 @@ public class Listener  extends SimpleListenerHost {
         JSONObject mem = JSONUtil.parseObj(RandomUtil.randomEle(WifeOttery.config.getStarData()));
         glt.put(sender.getId(), new Date());
         int q;
+
         if(RandomUtil.randomBoolean()) {
             q = RandomUtil.randomInt(80, 100);
+            WifeOttery.config.testWifeModel(Integer.valueOf(mem.getStr("sid")),group.getId(),sender.getId(),q);
             WifeOttery.config.addNewWive(group.getId(),sender.getId(),mem.getStr("s"));
-        }else q = RandomUtil.randomInt(1,79);
+        }else {
+            q = RandomUtil.randomInt(1, 79);
+            if(WifeOttery.config.testWifeModel(Integer.valueOf(mem.getStr("sid")),group.getId(),sender.getId(),q))
+                WifeOttery.config.save();
+        }
 
 
         String dg = mem.getStr("g");
         String dt = mem.getStr("t");
         Message m = new At(sender.getId())
                 .plus(" 今日老婆："
-                        +(dg.equals(dt) ? getGroupName(dg) : getGroupName(dg)+" Team "+dt) +" " + mem.getStr("s") +" ("+ mem.getStr("n")+") ("+mem.getStr("p")+")"
+                        +(getGroupName(dg).equalsIgnoreCase(dt) ? getGroupName(dg) : getGroupName(dg) + " Team "+dt)//对于BEJ48/CKG48/IDFT的调整
+                        +" " + mem.getStr("s") +" ("+ mem.getStr("n")+") ("+mem.getStr("p")+")"
                         +" | 情愫："
                         +q
                         +"% "
@@ -95,12 +107,13 @@ public class Listener  extends SimpleListenerHost {
             //没有图片或上传问题
         }
 
+        Wife she = WifeOttery.config.getWifeModel(Integer.valueOf(mem.getStr("sid")));
+        NormalMember senseFrom = group.get(she.getSenseFromInGroup(group.getId()));
         group.sendMessage(m.plus(
-                        "\n口袋ID: "+mem.getStr("i")+"\n"
-                        +util.getChangingTime(0l)+"后可更换"));
+                (mem.getStr("i").equals("0") ? "" : "\n口袋ID: "+ mem.getStr("i"))+"\n"
+                        +util.getChangingTime(0l)+"后可更换"
+                        +"\n当前情愫王："+(senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ?  senseFrom.getNick() : senseFrom.getNameCard()+"("+senseFrom.getNick()+")")) +"["+she.getSenseInGroup(group.getId())+"]"));
     }
-
-
 
     public InputStream getRes(String resLoc) {
         return HttpRequest.get(resLoc).execute().bodyStream();

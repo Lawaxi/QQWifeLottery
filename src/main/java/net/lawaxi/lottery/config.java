@@ -8,11 +8,13 @@ import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.Setting;
 import net.lawaxi.lottery.models.User;
 import net.lawaxi.lottery.models.UserWives;
+import net.lawaxi.lottery.models.Wife;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class config {
@@ -21,10 +23,14 @@ public class config {
     private final File starDataFile;
     public final ArrayList<String> starData;
     private final Setting s;
-    private String[] sysLottery = {};
-    private String[] sysData = {};
+    private String[] sysLottery;
+    private String[] sysData;
+    private String[] allowGroup;
+    //users
     private List<User> users = new ArrayList<>();
     private List<UserWives> wives = new ArrayList<>();
+    //wives
+    private HashMap<Integer, Wife> wiveModels = new HashMap<>();
 
     public config(File config, File starData) {
         this.config = config;
@@ -37,7 +43,9 @@ public class config {
             s.setByGroup("lottery","system","来个老婆,换个老婆");
             s.setByGroup("data","system","我的老婆");
             s.setByGroup("users", "users", "[]");
-            s.setByGroup("wives", "wives", "[]");
+            s.setByGroup("wives", "users", "[]");
+            s.setByGroup("senses", "wives", "{}");
+            s.setByGroup("allowGroups","permission","");
 
             s.store();
         }
@@ -53,7 +61,6 @@ public class config {
     }
 
     private void load(){
-
         sysLottery = s.getStrings("lottery","system");
         sysData = s.getStrings("data","system");
         if(sysLottery == null)
@@ -61,12 +68,18 @@ public class config {
         if(sysData == null)
             sysData = new String[]{"我的老婆"};
 
+        this.allowGroup = s.getStrings("allowGroup","permission");
+        if(sysData == null)
+            sysData = new String[]{};
+
+
+        //users
         for (Object o : JSONUtil.parseArray(s.getByGroup("users", "users")).toArray()) {
             JSONObject o1 = JSONUtil.parseObj(o);
             users.add(new User(o1.getLong("g"),o1.getLong("m")));
         }
 
-        for (Object o : JSONUtil.parseArray(s.getByGroup("wives", "wives")).toArray()) {
+        for (Object o : JSONUtil.parseArray(s.getByGroup("wives", "users")).toArray()) {
             JSONObject o1 = JSONUtil.parseObj(o);
             if(o1.keySet() == null)
                 continue;
@@ -77,11 +90,25 @@ public class config {
                 w.put(key, o1.getInt(key));
             }
         }
+
+        //wives
+        JSONObject o = JSONUtil.parseObj(s.getByGroup("sense", "wives"));
+        for(String sid : o.keySet()){
+            JSONObject wive = o.getJSONObject(sid);
+            HashMap<Long,Long[]> a = new HashMap();
+            for(String group : wive.keySet()){
+                a.put(Long.valueOf(group),wive.getBeanList(group, Long.class).toArray(new Long[0]));
+            }
+            wiveModels.put(Integer.valueOf(sid), new Wife(a));
+        }
+
     }
 
-    private void save(){
+    public void save(){
         s.setByGroup("users","users", listToJson(users));
-        s.setByGroup("wives","wives", listToJson(wives));
+        s.setByGroup("wives","users", listToJson(wives));
+        s.setByGroup("sense","wives",senseToJson());
+
         s.store();
     }
 
@@ -120,6 +147,14 @@ public class config {
         return sysData;
     }
 
+    public boolean doesGroupAllowed(long id){
+        for(String g : allowGroup){
+            if(g.equals(String.valueOf(id)))
+                return true;
+        }
+        return false;
+    }
+
     private String listToJson(List l){
         String out = "[";
         for(Object o : l){
@@ -128,6 +163,16 @@ public class config {
         if(out.length()>1)
             return out.substring(0,out.length()-1)+"]";
         return "[]";
+    }
+
+    private String senseToJson(){
+        String out = "{";
+        for (int sid : this.wiveModels.keySet()) {
+            out += "\""+sid+"\":"+this.wiveModels.get(sid).toString() + ",";
+        }
+        if (out.length() > 1)
+            return out.substring(0, out.length() - 1) + "}";
+        return "{}";
     }
 
     public int getUserIndex(long group, long member){
@@ -161,5 +206,22 @@ public class config {
 
     public ArrayList<String> getStarData() {
         return starData;
+    }
+
+    public boolean testWifeModel(int sid, long group, long qqID, int sense){
+        Wife w = this.wiveModels.get(sid);
+        if(w == null){
+            this.wiveModels.put(sid,new Wife(new HashMap<>()));
+        }else{
+            if(sense<=w.getSenseInGroup(group))
+                return false;
+        }
+
+        this.wiveModels.get(sid).putSense(group,qqID,sense);
+        return true;
+    }
+
+    public Wife getWifeModel(int sid){
+        return this.wiveModels.get(sid);
     }
 }
