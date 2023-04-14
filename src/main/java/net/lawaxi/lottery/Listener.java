@@ -56,7 +56,7 @@ public class Listener  extends SimpleListenerHost {
         if(glt.containsKey(sender.getId())){
             long between = new Date().getTime() - ((Date) glt.get(sender.getId())).getTime();
             if(between < DateUnit.HOUR.getMillis()*2){
-                group.sendMessage(new At(sender.getId()).plus(util.getChangingTime(between)+"后可更换，在等等吧"));
+                group.sendMessage(new At(sender.getId()).plus(util.getChangingTime(between)+"后可更换，再等等吧"));
                 return;
             }
         }

@@ -38,7 +38,7 @@ public class config {
             s.setByGroup("dataOut","system","\\n累计带走%d人 共%d次\\n带走次数御三：%s");
             s.setByGroup("dataVoidOut","system","\\n你还没有老婆~ 情愫达到80%才可以带走捏");
             s.setByGroup("users", "users", "[]");
-            s.setByGroup("wives", "wives", "[]");
+            s.setByGroup("wives", "users", "[]");
 
             s.store();
         }
@@ -63,7 +63,7 @@ public class config {
             users.add(new User(o1.getLong("g"),o1.getLong("m")));
         }
 
-        for (Object o : JSONUtil.parseArray(s.getByGroup("wives", "wives")).toArray()) {
+        for (Object o : JSONUtil.parseArray(s.getByGroup("wives", "users")).toArray()) {
             JSONObject o1 = JSONUtil.parseObj(o);
             if(o1.keySet() == null)
                 continue;
@@ -78,7 +78,7 @@ public class config {
 
     private void save(){
         s.setByGroup("users","users", listToJson(users));
-        s.setByGroup("wives","wives", listToJson(wives));
+        s.setByGroup("wives","users", listToJson(wives));
         s.store();
     }
 
