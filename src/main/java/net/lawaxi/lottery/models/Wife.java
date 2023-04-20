@@ -12,7 +12,11 @@ public class Wife {
     }
 
     public int getSenseInGroup(Long group){
-        return Integer.valueOf(String.valueOf(sense.get(group)[1]));
+        try {
+            return Integer.valueOf(String.valueOf(sense.get(group)[1]));
+        }catch (Exception e){
+            return 0;
+        }
     }
 
     public long getSenseFromInGroup(Long group){
