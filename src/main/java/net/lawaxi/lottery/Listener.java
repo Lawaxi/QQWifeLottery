@@ -60,7 +60,7 @@ public class Listener extends SimpleListenerHost {
         if (glt.containsKey(sender.getId())) {
             long between = new Date().getTime() - ((Date) glt.get(sender.getId())).getTime();
             if (between < DateUnit.HOUR.getMillis() * 2) {
-                group.sendMessage(new At(sender.getId()).plus(util.getChangingTime(between) + "后可更换，再等等吧"));
+                group.sendMessage(new At(sender.getId()).plus(util.getChangingTime(between) + "，再等等吧"));
                 return;
             }
         }
@@ -79,7 +79,7 @@ public class Listener extends SimpleListenerHost {
                         (mem.getNameCard().equals("") ? mem.getNick() : mem.getNameCard() + "(" + mem.getNick() + ")")
                         , q
                         , util.recommend(q)
-                        , util.getChangingTime(0L))));
+                        , util.getChangingTime(new Date().getTime() - ((Date) glt.get(sender.getId())).getTime()))));
     }
 
     private void woDeLaoPo(Member sender, Group group) {
