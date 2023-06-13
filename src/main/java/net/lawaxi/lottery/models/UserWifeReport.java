@@ -8,7 +8,7 @@ public class UserWifeReport {
     private final List<Long> wives; //降序
     public final UserWives userWives;
 
-    public UserWifeReport(UserWives userWives){
+    public UserWifeReport(UserWives userWives) {
         this.userWives = userWives;
 
         wives = new ArrayList<>(userWives.keySet());
@@ -16,8 +16,8 @@ public class UserWifeReport {
 
 
         int count = 0;
-        for(long key : userWives.keySet()){
-            count+= userWives.get(key);
+        for (long key : userWives.keySet()) {
+            count += userWives.get(key);
         }
         total = count;
     }
@@ -30,11 +30,11 @@ public class UserWifeReport {
         return total;
     }
 
-    public int getWifeTotal(){
+    public int getWifeTotal() {
         return wives.size();
     }
 
-    public int getCount(Long wife){
+    public int getCount(Long wife) {
         return userWives.get(wife);
     }
 }
