@@ -11,6 +11,6 @@ public class User {
 
     @Override
     public String toString() {
-        return String.format("{\"g\":%d,\"m\":%d}",g,m);
+        return String.format("{\"g\":%d,\"m\":%d}", g, m);
     }
 }
