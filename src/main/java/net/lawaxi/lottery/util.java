@@ -4,6 +4,8 @@ import cn.hutool.core.date.DateUnit;
 
 public class util {
     public static String recommend(int qingSu){
+        if(qingSu==100)
+            return "原地结婚";
         if(qingSu>89)
             return "最佳拍档";
         if(qingSu>79)

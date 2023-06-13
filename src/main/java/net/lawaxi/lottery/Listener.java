@@ -1,6 +1,7 @@
 package net.lawaxi.lottery;
 
 import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONObject;
@@ -24,6 +25,11 @@ import java.util.HashMap;
 
 public class Listener  extends SimpleListenerHost {
 
+    public static Listener INSTANCE;
+
+    public Listener(){
+        INSTANCE = this;
+    }
     private HashMap<Long, HashMap<Integer,Long>> lastTime = new HashMap<>();
 
     @EventHandler()
@@ -76,15 +82,14 @@ public class Listener  extends SimpleListenerHost {
 
 
         JSONObject mem = JSONUtil.parseObj(RandomUtil.randomEle(WifeOttery.config.getStarData()));
-        glt.put(sender.getId(), new Date());
+        glt.put(sender.getId(), glt.containsKey(sender.getId())? new Date() : DateUtil.offsetHour(new Date(),-2));//是否为换老婆
         int q;
-
         if(RandomUtil.randomBoolean()) {
-            q = RandomUtil.randomInt(80, 100);
+            q = RandomUtil.randomInt(80, 101);
             WifeOttery.config.testWifeModel(Integer.valueOf(mem.getStr("sid")),group.getId(),sender.getId(),q);
             WifeOttery.config.addNewWive(group.getId(),sender.getId(),mem.getStr("s"));
         }else {
-            q = RandomUtil.randomInt(1, 79);
+            q = RandomUtil.randomInt(1, 80);
             if(WifeOttery.config.testWifeModel(Integer.valueOf(mem.getStr("sid")),group.getId(),sender.getId(),q))
                 WifeOttery.config.save();
         }
@@ -145,7 +150,7 @@ public class Listener  extends SimpleListenerHost {
         }
 
         String yuSan = "";
-        for(int i = 0;i<(report.getWifeTotal()>4 ? 4 : report.getWifeTotal());i++){
+        for(int i = 0;i<(report.getWifeTotal()>3 ? 3 : report.getWifeTotal());i++){
             String wife = report.getWives().get(i);
             yuSan+=wife+" "+report.getCount(wife)+"次"+" | ";
         }
@@ -154,5 +159,11 @@ public class Listener  extends SimpleListenerHost {
         group.sendMessage(new At(sender.getId()).plus(
                 "\n累计带走"+report.getWifeTotal()+"人 共"+report.getTotal()+"次\n"
                         +"带走次数御三：\n"+yuSan.substring(0,yuSan.length()-3)));
+    }
+
+    public void reset(){
+        for(HashMap m:lastTime.values()){
+            m.clear();
+        }
     }
 }
