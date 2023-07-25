@@ -10,9 +10,9 @@ Mirai-Console插件，构建mirai（[mamoe/mirai](https://github.com/mamoe/mirai
 ### SNH48 Group版
 
 - 本插件每次可抽一位SNH48 Group成员做老婆
-- 有新成员出道时，在任意群中发送update_star_data更新本地数据
+- 有新成员出道时，在任意群中发送`update_star_data`更新本地数据
 
-请下载release中48ver版，文件名为wifeOttery48-xxx.mirai2.jar
+*请下载release中48ver版，文件名为wifeOttery48-xxx.mirai2.jar*
 
 
 ### 配置示例
