@@ -1,17 +1,24 @@
 package net.lawaxi.lottery;
 
-import cn.hutool.cron.CronUtil;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.format.FastDateFormat;
+import cn.hutool.cron.Scheduler;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import net.lawaxi.lottery.handler.BroadcastSender;
+import net.lawaxi.lottery.handler.Listener;
+import net.lawaxi.lottery.handler.WifeHandler;
+import net.lawaxi.lottery.handler.config;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 import net.mamoe.mirai.event.GlobalEventChannel;
-import net.mamoe.mirai.event.events.BotOnlineEvent;
 
 public final class WifeOttery extends JavaPlugin {
     public static final WifeOttery INSTANCE = new WifeOttery();
-    public static config config;
+    public static net.lawaxi.lottery.handler.config config;
 
     private WifeOttery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.7-test2")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.9")
                 .name("来个老婆48成员版")
                 .author("小d")
                 .build());
@@ -21,19 +28,43 @@ public final class WifeOttery extends JavaPlugin {
     public void onEnable() {
         config = new config(resolveConfigFile("config.setting"),
                 resolveConfigFile("star_data"));
-        GlobalEventChannel.INSTANCE.registerListenerHost(new Listener());
-        GlobalEventChannel.INSTANCE.parentScope(INSTANCE).subscribeOnce(BotOnlineEvent.class, event -> {
-            listenBroadcast(event);
-        });
+        if (config.allowed()) {
+            GlobalEventChannel.INSTANCE.registerListenerHost(new Listener());
+            new WifeHandler();
+        }
+        listenBroadcast();
     }
 
-    private void listenBroadcast(BotOnlineEvent event) {
-        CronUtil.schedule("0 0 8 * * *", new Runnable() { //每天八点重置
-                    @Override
-                    public void run() {
-                        Listener.INSTANCE.reset();
-                    }
-                }
-        );
+    private void listenBroadcast() {
+        if (config.allowed() || config.allowedBroadcast()) {
+            Scheduler scheduler = new Scheduler();
+
+            if (config.allowed()) {
+                scheduler.schedule("0 0 8 * * *", new Runnable() { //每天八点重置
+                            @Override
+                            public void run() {
+                                WifeHandler.INSTANCE.reset();
+                            }
+                        }
+                );
+            }
+            if (config.allowedBroadcast()) {
+                FastDateFormat format = FastDateFormat.getInstance("MM.DD");
+                scheduler.schedule("0 0 0 * * *", new Runnable() {
+                            @Override
+                            public void run() {
+                                String today = format.format(new DateTime());
+                                for (Object object : config.getStarData()) {
+                                    JSONObject o = JSONUtil.parseObj(object);
+                                    if (today.equals(o.getStr("birthday"))) {
+                                        new BroadcastSender(o).start();
+                                    }
+                                }
+                            }
+                        }
+                );
+            }
+            scheduler.start();
+        }
     }
 }
