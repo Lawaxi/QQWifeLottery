@@ -1,17 +1,19 @@
 package net.lawaxi.lottery;
 
-import cn.hutool.cron.CronUtil;
+import cn.hutool.cron.Scheduler;
+import net.lawaxi.lottery.handler.Listener;
+import net.lawaxi.lottery.handler.WifeHandler;
+import net.lawaxi.lottery.handler.config;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 import net.mamoe.mirai.event.GlobalEventChannel;
-import net.mamoe.mirai.event.events.BotOnlineEvent;
 
 public final class WifeOttery extends JavaPlugin {
     public static final WifeOttery INSTANCE = new WifeOttery();
     public static config config;
 
     private WifeOttery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery", "0.1.7-test2")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery", "0.1.8")
                 .name("来个老婆")
                 .author("小d")
                 .build());
@@ -21,18 +23,18 @@ public final class WifeOttery extends JavaPlugin {
     public void onEnable() {
         config = new config(resolveConfigFile("config.setting"));
         GlobalEventChannel.INSTANCE.registerListenerHost(new Listener());
-        GlobalEventChannel.INSTANCE.parentScope(INSTANCE).subscribeOnce(BotOnlineEvent.class, event -> {
-            listenBroadcast(event);
-        });
+        listenBroadcast();
     }
 
-    private void listenBroadcast(BotOnlineEvent event) {
-        CronUtil.schedule("0 0 8 * * *", new Runnable() { //每天八点重置
+    private void listenBroadcast() {
+        Scheduler scheduler = new Scheduler();
+        scheduler.schedule("0 0 8 * * *", new Runnable() { //每天八点重置
                     @Override
                     public void run() {
-                        Listener.INSTANCE.reset();
+                        WifeHandler.INSTANCE.reset();
                     }
                 }
         );
+        scheduler.start();
     }
 }

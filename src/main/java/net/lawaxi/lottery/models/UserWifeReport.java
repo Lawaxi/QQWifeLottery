@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserWifeReport {
+    public final UserWives userWives;
     private final int total;
     private final List<Long> wives; //降序
-    public final UserWives userWives;
 
     public UserWifeReport(UserWives userWives) {
         this.userWives = userWives;
