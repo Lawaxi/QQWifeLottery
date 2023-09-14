@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class WifeHandler {
-
     public static final String APIImage = "https://www.snh48.com/images/member/zp_%s.jpg";
     public static WifeHandler INSTANCE;
     private final HashMap<Long, HashMap<Integer, Long>> lastTime = new HashMap<>();
@@ -95,7 +94,7 @@ public class WifeHandler {
         Wife she = WifeOttery.config.getWifeModel(Integer.valueOf(mem.getStr("sid")));
         NormalMember senseFrom = group.get(she.getSenseFromInGroup(group.getId()));
         group.sendMessage(m.plus(
-                (mem.getStr("i").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
+                (mem.getStr("i", "0").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
                         + WifeUtil.getChangingTime(new Date().getTime() - ((Date) glt.get(sender.getId())).getTime())
                         + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + she.getSenseInGroup(group.getId()) + "%]"));
     }

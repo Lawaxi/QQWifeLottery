@@ -116,6 +116,9 @@ public class config {
     public int downloadStarData() {
         this.starData.clear();
 
+        this.starData.add(JSONUtil.parse("{\"s\":\"鞠婧祎\",\"sid\":\"10027\",\"n\":\"小鞠\",\"g\":\"明星殿堂\",\"t\":\"\",\"p\":\"SNH48 二期生\",\"i\":\"0\",\"birthday\":\"06.18\"}"));
+        this.starData.add(JSONUtil.parse("{\"s\":\"李艺彤\",\"sid\":\"10031\",\"n\":\"发卡\",\"g\":\"明星殿堂\",\"t\":\"\",\"p\":\"SNH48 二期生\",\"i\":\"0\",\"birthday\":\"12.23\"}"));
+
         String j = HttpRequest.get(API)
                 .header("Host", "h5.48.cn").header("Connection", "keep-alive").header("sec-ch-ua", "\"Google Chrome\";v=\"107\", \"Chromium\";v=\"107\", \"Not=A?Brand\";v=\"24\"").header("sec-ch-ua-mobile", "?0").header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36").header("sec-ch-ua-platform", "\"Windows\"").header("Accept", "*/*").header("Sec-Fetch-Site", "cross-site").header("Sec-Fetch-Mode", "no-cors").header("Sec-Fetch-Dest", "script").header("Referer", "https://www.snh48.com/").header("Accept-Encoding", "gzip, deflate, br").header("Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,zh-TW;q=0.6")
                 .execute().body();

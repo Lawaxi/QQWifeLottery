@@ -18,7 +18,7 @@ public final class WifeOttery extends JavaPlugin {
     public static net.lawaxi.lottery.handler.config config;
 
     private WifeOttery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.9")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.9-test2")
                 .name("来个老婆48成员版")
                 .author("小d")
                 .build());
@@ -40,7 +40,7 @@ public final class WifeOttery extends JavaPlugin {
             Scheduler scheduler = new Scheduler();
 
             if (config.allowed()) {
-                scheduler.schedule("0 0 8 * * *", new Runnable() { //每天八点重置
+                scheduler.schedule("0 8 * * *", new Runnable() { //每天八点重置
                             @Override
                             public void run() {
                                 WifeHandler.INSTANCE.reset();
@@ -49,11 +49,12 @@ public final class WifeOttery extends JavaPlugin {
                 );
             }
             if (config.allowedBroadcast()) {
-                FastDateFormat format = FastDateFormat.getInstance("MM.DD");
-                scheduler.schedule("0 0 0 * * *", new Runnable() {
+                FastDateFormat format = FastDateFormat.getInstance("MM.dd");
+                scheduler.schedule("0 0 * * *", new Runnable() {
                             @Override
                             public void run() {
                                 String today = format.format(new DateTime());
+                                getLogger().info(today);
                                 for (Object object : config.getStarData()) {
                                     JSONObject o = JSONUtil.parseObj(object);
                                     if (today.equals(o.getStr("birthday"))) {
