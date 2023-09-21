@@ -11,9 +11,22 @@ Mirai-Console插件，构建mirai（[mamoe/mirai](https://github.com/mamoe/mirai
 
 - 本插件每次可抽一位SNH48 Group成员做老婆
 - 有新成员出道时，在任意群中发送`update_star_data`更新本地数据
+- 通过配置项allowGroups可选择在哪些群中开启此功能，以逗号隔开群号
+- 通过配置项birthdayBroadcastGroup可选择在哪些群中开启生日祝福，以逗号隔开群号
 
 *请下载release中48ver版，文件名为wifeOttery48-xxx.mirai2.jar*
 
+#### 生日祝福[>=0.1.9-test3]
+
+将自动在每天零点为star_data中所有今日生日小偶像送上祝福，自动由公式照生成一张生日海报
+
+配置项birthdayBroadcastFont为海报文字字体，默认Microsoft YaHei，请确认系统中包含填写的字体
+
+##### Linux安装字体
+
+- 将字体文件放入/usr/share/fonts目录
+- `fc-cache -f -v` 更新字体
+- `fc-list :lang=zh` 当前系统中中文字体
 
 ### 配置示例
 
