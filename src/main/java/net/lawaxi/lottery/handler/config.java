@@ -203,13 +203,8 @@ public class config {
         return "{}";
     }
 
-    public int getUserIndex(long group, long member) {
-        for (int i = 0; i < this.users.size(); i++) {
-            User user = this.users.get(i);
-            if (user.g == group && user.m == member)
-                return i;
-        }
-        return -1;
+    public int getUserIndex(User user) {
+        return this.users.indexOf(user);
     }
 
     public User getUserByIndex(int index) {
@@ -220,23 +215,23 @@ public class config {
     }
 
     public void addNewWive(User user, String wife) {
-        if (user.index == -1) {
+        if (user.getIndex()== -1) {
             users.add(user);
             wives.add(new UserWives());
         }
 
-        wives.get(new User(user).index).add(wife);
+        wives.get(user.getIndex()).add(wife);
         save();
     }
 
     public UserWives getUserWives(User user) {
-        if (user.index == -1) {
+        if (user.getIndex()== -1) {
             users.add(user);
             wives.add(new UserWives());
             save();
         }
 
-        return wives.get(new User(user).index);
+        return wives.get(user.getIndex());
     }
 
     public JSONArray getStarData() {

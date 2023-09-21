@@ -40,7 +40,7 @@ public class WifeHandler {
         }
 
         if (message.equals("我的编号")) {
-            group.sendMessage(new At(sender.getId()).plus("" + new User(group.getId(), sender.getId()).index));
+            group.sendMessage(new At(sender.getId()).plus("" + new User(group.getId(), sender.getId()).getIndex()));
             return;
         }
 
@@ -61,26 +61,27 @@ public class WifeHandler {
 
     public void laiGeLaoPo(long sender, Group group) {
         User user = new User(group.getId(), sender);
-        int chance = chances.getOrDefault(user.index, 0);
+        int index = user.getIndex();
+        int chance = chances.getOrDefault(index, 0);
 
         //免费次数
-        if (lastTime.containsKey(user.index)) {
-            long between = new Date().getTime() - lastTime.get(user.index);
+        if (lastTime.containsKey(index)) {
+            long between = new Date().getTime() - lastTime.get(index);
             if (between < DateUnit.HOUR.getMillis() * 2) {
                 //特殊次数
                 if (chance > 0) {
                     chance -= 1;
-                    chances.put(user.index, chance);
+                    chances.put(index, chance);
                 } else {
-                    group.sendMessage(new At(sender).plus(WifeUtil.getChangingTime(new Date(lastTime.get(user.index)))));
+                    group.sendMessage(new At(sender).plus(WifeUtil.getChangingTime(new Date(lastTime.get(index)))));
                     return;
                 }
             } else {
-                lastTime.put(user.index, new Date().getTime());
+                lastTime.put(index, new Date().getTime());
             }
 
         } else {
-            lastTime.put(user.index, DateUtil.offsetHour(new Date(), -2).getTime());
+            lastTime.put(index, DateUtil.offsetHour(new Date(), -2).getTime());
         }
 
         JSONObject mem = JSONUtil.parseObj(RandomUtil.randomEle(config.getStarData()));
@@ -171,7 +172,7 @@ public class WifeHandler {
     }
 
     public int getUserIndex(long sender, long group) {
-        return new User(group, sender).index;
+        return new User(group, sender).getIndex();
     }
 
     public User getUserByIndex(int index) {
