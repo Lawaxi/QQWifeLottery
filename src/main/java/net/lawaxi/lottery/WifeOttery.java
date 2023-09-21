@@ -18,7 +18,7 @@ public final class WifeOttery extends JavaPlugin {
     public static net.lawaxi.lottery.handler.config config;
 
     private WifeOttery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.9-test2")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.9-test3")
                 .name("来个老婆48成员版")
                 .author("小d")
                 .build());

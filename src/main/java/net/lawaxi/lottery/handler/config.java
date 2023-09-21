@@ -10,6 +10,7 @@ import net.lawaxi.lottery.models.User;
 import net.lawaxi.lottery.models.UserWives;
 import net.lawaxi.lottery.models.Wife;
 
+import java.awt.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.List;
 public class config {
     public static final String API = "https://h5.48.cn/resource/jsonp/allmembers.php?gid=00";
     public final JSONArray starData;
+    public final Font font;
     private final File starDataFile;
     private final Setting s;
     //users
@@ -40,6 +42,7 @@ public class config {
 
             s.setByGroup("lottery", "system", "来个老婆,换个老婆");
             s.setByGroup("data", "system", "我的老婆");
+            s.setByGroup("birthdayBroadcastFont", "system", "Microsoft YaHei");
             s.setByGroup("users", "users", "[]");
             s.setByGroup("wives", "users", "[]");
             s.setByGroup("sense", "wives", "{}");
@@ -56,6 +59,7 @@ public class config {
             this.starData = JSONUtil.parseArray(FileUtil.readString(this.starDataFile, "UTF-8"));
         }
 
+        font = new Font(s.getStr("birthdayBroadcastFont", "system", "Microsoft YaHei"), Font.PLAIN, 100);
         load();
     }
 

@@ -52,9 +52,10 @@ public class WifeHandler {
 
         HashMap glt = lastTime.get(group.getId());
         if (glt.containsKey(sender.getId())) {
-            long between = new Date().getTime() - ((Date) glt.get(sender.getId())).getTime();
+            Date date = (Date) glt.get(sender.getId());
+            long between = new Date().getTime() - date.getTime();
             if (between < DateUnit.HOUR.getMillis() * 2) {
-                group.sendMessage(new At(sender.getId()).plus(WifeUtil.getChangingTime(between) + "，再等等吧"));
+                group.sendMessage(new At(sender.getId()).plus(WifeUtil.getChangingTime(date) + "，再等等吧"));
                 return;
             }
         }
@@ -95,7 +96,7 @@ public class WifeHandler {
         NormalMember senseFrom = group.get(she.getSenseFromInGroup(group.getId()));
         group.sendMessage(m.plus(
                 (mem.getStr("i", "0").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
-                        + WifeUtil.getChangingTime(new Date().getTime() - ((Date) glt.get(sender.getId())).getTime())
+                        + WifeUtil.getChangingTime((Date) glt.get(sender.getId()))
                         + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + she.getSenseInGroup(group.getId()) + "%]"));
     }
 

@@ -1,6 +1,9 @@
 package net.lawaxi.lottery.utils;
 
 import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
+
+import java.util.Date;
 
 public class WifeUtil {
     public static String recommend(int qingSu) {
@@ -27,5 +30,12 @@ public class WifeUtil {
         if (hour == min && min == sec && sec == 0)
             return "当前可更换";
         return hour + "小时" + min + "分钟" + sec + "秒后可更换";
+    }
+
+    public static String getChangingTime(Date date) {
+        if (new Date().getTime() - date.getTime() >= 0)
+            return "当前可更换";
+        else
+            return DateUtil.format(date, "HH点mm分ss秒") + "可更换";
     }
 }
