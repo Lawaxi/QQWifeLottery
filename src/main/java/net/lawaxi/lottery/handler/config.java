@@ -212,24 +212,31 @@ public class config {
         return -1;
     }
 
-    public void addNewWive(long group, long member, String wife) {
-        if (getUserIndex(group, member) == -1) {
-            users.add(new User(group, member));
+    public User getUserByIndex(int index) {
+        if (index >= 0 && index < this.users.size()) {
+            return users.get(index);
+        }
+        return null;
+    }
+
+    public void addNewWive(User user, String wife) {
+        if (user.index == -1) {
+            users.add(user);
             wives.add(new UserWives());
         }
 
-        wives.get(getUserIndex(group, member)).add(wife);
+        wives.get(new User(user).index).add(wife);
         save();
     }
 
-    public UserWives getUserWives(long group, long member) {
-        if (getUserIndex(group, member) == -1) {
-            users.add(new User(group, member));
+    public UserWives getUserWives(User user) {
+        if (user.index == -1) {
+            users.add(user);
             wives.add(new UserWives());
             save();
         }
 
-        return wives.get(getUserIndex(group, member));
+        return wives.get(new User(user).index);
     }
 
     public JSONArray getStarData() {
@@ -245,15 +252,15 @@ public class config {
         return 0;
     }
 
-    public boolean testWifeModel(int sid, long group, long qqID, int sense) {
+    public boolean testWifeModel(int sid, User user, int sense) {
         Wife w = this.wiveModels.get(sid);
         if (w == null) {
             this.wiveModels.put(sid, new Wife(new HashMap<>()));
-        } else if (sense <= w.getSenseInGroup(group)) {
+        } else if (sense <= w.getSenseInGroup(user.g)) {
             return false;
         }
 
-        this.wiveModels.get(sid).putSense(group, qqID, sense);
+        this.wiveModels.get(sid).putSense(user.g, user.m, sense);
         return true;
     }
 

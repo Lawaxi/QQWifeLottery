@@ -1,6 +1,6 @@
 package net.lawaxi.lottery.utils;
 
-import net.lawaxi.lottery.WifeOttery;
+import net.lawaxi.lottery.handler.config;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -16,6 +16,12 @@ import java.net.URL;
 import java.util.Random;
 
 public class ImageModifier {
+
+    private static config config;
+
+    public static void setConfig(config config) {
+        ImageModifier.config = config;
+    }
 
     public static InputStream modifyImage(String name, String imageUrl) throws IOException {
         // 下载图片
@@ -40,7 +46,7 @@ public class ImageModifier {
         Image scaledImage = originalImage.getScaledInstance(300, 400, Image.SCALE_SMOOTH);
         g2d.drawImage(scaledImage, 100, 100, null);
 
-        g2d.setFont(WifeOttery.config.font);
+        g2d.setFont(config.font);
         g2d.setColor(Color.WHITE);
         String text = name + "生日快乐";
         FontMetrics fontMetrics = g2d.getFontMetrics();

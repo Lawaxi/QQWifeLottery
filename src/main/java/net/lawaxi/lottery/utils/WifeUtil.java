@@ -32,10 +32,11 @@ public class WifeUtil {
         return hour + "小时" + min + "分钟" + sec + "秒后可更换";
     }
 
-    public static String getChangingTime(Date date) {
-        if (new Date().getTime() - date.getTime() >= 0)
+    public static String getChangingTime(Date lastTime) {
+        Date nextTime = DateUtil.offsetHour(lastTime, 2);
+        if (new Date().getTime() - nextTime.getTime() >= 0)
             return "当前可更换";
         else
-            return DateUtil.format(date, "HH点mm分ss秒") + "可更换";
+            return DateUtil.format(nextTime, "HH点mm分ss秒") + "可更换";
     }
 }

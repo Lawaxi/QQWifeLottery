@@ -6,7 +6,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import net.lawaxi.lottery.WifeOttery;
+import net.lawaxi.lottery.models.User;
 import net.lawaxi.lottery.models.UserWifeReport;
 import net.lawaxi.lottery.models.Wife;
 import net.lawaxi.lottery.utils.WifeUtil;
@@ -24,60 +24,71 @@ import java.util.HashMap;
 public class WifeHandler {
     public static final String APIImage = "https://www.snh48.com/images/member/zp_%s.jpg";
     public static WifeHandler INSTANCE;
-    private final HashMap<Long, HashMap<Integer, Long>> lastTime = new HashMap<>();
+    private final config config;
+    private final HashMap<Integer, Long> lastTime = new HashMap<>();
+    private final HashMap<Integer, Integer> chances = new HashMap<>();
 
-    public WifeHandler() {
+    public WifeHandler(config config) {
+        this.config = config;
         INSTANCE = this;
     }
 
     public void testLaiGeLaoPo(String message, Member sender, Group group) {
-        for (String o : WifeOttery.config.getSysLottery()) {
+        for (String o : config.getSysLottery()) {
             if (message.equals(o)) {
-                laiGeLaoPo(sender, group);
+                laiGeLaoPo(sender.getId(), group);
                 return;
             }
         }
 
-        for (String o : WifeOttery.config.getSysData()) {
+        for (String o : config.getSysData()) {
             if (message.equals(o)) {
-                woDeLaoPo(sender, group);
+                woDeLaoPo(sender.getId(), group);
                 return;
             }
         }
     }
 
-    private void laiGeLaoPo(Member sender, Group group) {
-        if (!lastTime.containsKey(group.getId()))
-            lastTime.put(group.getId(), new HashMap<>());
+    public void laiGeLaoPo(long sender, Group group) {
+        User user = new User(group.getId(), sender);
+        int chance = chances.getOrDefault(user.index, 0);
 
-        HashMap glt = lastTime.get(group.getId());
-        if (glt.containsKey(sender.getId())) {
-            Date date = (Date) glt.get(sender.getId());
-            long between = new Date().getTime() - date.getTime();
+        //免费次数
+        if (lastTime.containsKey(user.index)) {
+            long between = new Date().getTime() - lastTime.get(user.index);
             if (between < DateUnit.HOUR.getMillis() * 2) {
-                group.sendMessage(new At(sender.getId()).plus(WifeUtil.getChangingTime(date) + "，再等等吧"));
-                return;
+                //特殊次数
+                if (chance > 0) {
+                    chance -= 1;
+                    chances.put(user.index, chance);
+                } else {
+                    group.sendMessage(new At(sender).plus(WifeUtil.getChangingTime(new Date(lastTime.get(user.index)))));
+                    return;
+                }
+            } else {
+                lastTime.put(user.index, new Date().getTime());
             }
+
+        } else {
+            lastTime.put(user.index, DateUtil.offsetHour(new Date(), -2).getTime());
         }
 
-        JSONObject mem = JSONUtil.parseObj(RandomUtil.randomEle(WifeOttery.config.getStarData()));
-        glt.put(sender.getId(), glt.containsKey(sender.getId()) ? new Date() : DateUtil.offsetHour(new Date(), -2));//是否为换老婆
-
+        JSONObject mem = JSONUtil.parseObj(RandomUtil.randomEle(config.getStarData()));
         int sid = Integer.valueOf(mem.getStr("sid"));
-        int hq = WifeOttery.config.getHistorySense(sid, group.getId());
+        int hq = config.getHistorySense(sid, group.getId());
         int q = RandomUtil.randomInt(1, hq < 100 ? 101 : hq + 11);
         if (q > hq) {
-            WifeOttery.config.testWifeModel(sid, group.getId(), sender.getId(), q);
+            config.testWifeModel(sid, user, q);
         }
         if (q > 79) {
-            WifeOttery.config.addNewWive(group.getId(), sender.getId(), mem.getStr("s"));
+            config.addNewWive(user, mem.getStr("s"));
         } else if (q > hq) {
-            WifeOttery.config.save();
+            config.save();
         }
 
         String dg = mem.getStr("g");
         String dt = mem.getStr("t");
-        Message m = new At(sender.getId())
+        Message m = new At(sender)
                 .plus(" 今日老婆："
                         + (getGroupName(dg).equalsIgnoreCase(dt) ? getGroupName(dg) : getGroupName(dg) + " Team " + dt)//对于BEJ48/CKG48/IDFT的调整
                         + " " + mem.getStr("s") + " (" + mem.getStr("n") + ") (" + mem.getStr("p") + ")"
@@ -92,15 +103,16 @@ public class WifeHandler {
             //没有图片或上传问题
         }
 
-        Wife she = WifeOttery.config.getWifeModel(Integer.valueOf(mem.getStr("sid")));
+        Wife she = config.getWifeModel(Integer.valueOf(mem.getStr("sid")));
         NormalMember senseFrom = group.get(she.getSenseFromInGroup(group.getId()));
         group.sendMessage(m.plus(
                 (mem.getStr("i", "0").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
-                        + WifeUtil.getChangingTime((Date) glt.get(sender.getId()))
+                        + WifeUtil.getChangingTime(new Date(lastTime.get(user)))
+                        + "\n可用特殊次数 " + chance + " 次"
                         + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + she.getSenseInGroup(group.getId()) + "%]"));
     }
 
-    public InputStream getRes(String resLoc) {
+    private InputStream getRes(String resLoc) {
         return HttpRequest.get(resLoc).execute().bodyStream();
     }
 
@@ -125,10 +137,10 @@ public class WifeHandler {
         }
     }
 
-    private void woDeLaoPo(Member sender, Group group) {
-        UserWifeReport report = new UserWifeReport(WifeOttery.config.getUserWives(group.getId(), sender.getId()));
+    public void woDeLaoPo(long sender, Group group) {
+        UserWifeReport report = new UserWifeReport(config.getUserWives(new User(group.getId(), sender)));
         if (report.getWifeTotal() == 0) {
-            group.sendMessage(new At(sender.getId()).plus("\n你还没有老婆~ 情愫达到80%才可以带走捏"));
+            group.sendMessage(new At(sender).plus("\n你还没有老婆~ 情愫达到80%才可以带走捏"));
             return;
         }
 
@@ -139,14 +151,25 @@ public class WifeHandler {
         }
 
 
-        group.sendMessage(new At(sender.getId()).plus(
+        group.sendMessage(new At(sender).plus(
                 "\n累计带走" + report.getWifeTotal() + "人 共" + report.getTotal() + "次\n"
                         + "带走次数御三：\n" + yuSan.substring(0, yuSan.length() - 3)));
     }
 
     public void reset() {
-        for (HashMap m : lastTime.values()) {
-            m.clear();
-        }
+        lastTime.clear();
     }
+
+    public int getUserIndex(long sender, long group) {
+        return new User(group, sender).index;
+    }
+
+    public User getUserByIndex(int index) {
+        return config.getUserByIndex(index);
+    }
+
+    public void offsetUserChance(int index, int offset) {
+        chances.put(index, chances.get(index) + offset);
+    }
+
 }
