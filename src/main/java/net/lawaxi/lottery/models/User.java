@@ -13,20 +13,20 @@ public class User {
         this.m = member;
     }
 
-    public int getIndex() {
-        return config.getUserIndex(this);
+    public static void setConfig(config config) {
+        User.config = config;
     }
 
-    public void setWives(UserWives wives) {
-        this.wives = wives;
+    public int getIndex() {
+        return config.getUserIndex(this);
     }
 
     public UserWives getWives() {
         return wives;
     }
 
-    public static void setConfig(config config) {
-        User.config = config;
+    public void setWives(UserWives wives) {
+        this.wives = wives;
     }
 
     @Override
@@ -36,8 +36,8 @@ public class User {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof User){
-            return ((User) obj).g==g && ((User) obj).m==m;
+        if (obj instanceof User) {
+            return ((User) obj).g == g && ((User) obj).m == m;
         }
         return false;
     }

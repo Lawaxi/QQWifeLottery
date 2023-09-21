@@ -118,7 +118,7 @@ public class WifeHandler {
         NormalMember senseFrom = group.get(she.getSenseFromInGroup(group.getId()));
         group.sendMessage(m.plus(
                 (mem.getStr("i", "0").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
-                        + WifeUtil.getChangingTime(new Date(lastTime.get(user)))
+                        + WifeUtil.getChangingTime(new Date(lastTime.get(user.getIndex())))
                         + "\n可用特殊次数 " + chance + " 次"
                         + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + she.getSenseInGroup(group.getId()) + "%]"));
     }

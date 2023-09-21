@@ -215,7 +215,7 @@ public class config {
     }
 
     public void addNewWive(User user, String wife) {
-        if (user.getIndex()== -1) {
+        if (user.getIndex() == -1) {
             users.add(user);
             wives.add(new UserWives());
         }
@@ -225,7 +225,7 @@ public class config {
     }
 
     public UserWives getUserWives(User user) {
-        if (user.getIndex()== -1) {
+        if (user.getIndex() == -1) {
             users.add(user);
             wives.add(new UserWives());
             save();
