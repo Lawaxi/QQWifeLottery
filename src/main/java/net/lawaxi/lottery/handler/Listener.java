@@ -19,13 +19,10 @@ public class Listener extends SimpleListenerHost {
     public ListeningStatus onGroupMessage(GroupMessageEvent event) {
         Group group = event.getGroup();
         if (config.doesGroupAllowed(group.getId())) {
-            Member sender = event.getSender();
-            String message = event.getMessage().contentToString();
-            if (message.equals("update_star_data")) {
-                group.sendMessage(new At(sender.getId()).plus("已更新成员列表，当前数据总数 " + config.downloadStarData() + " 人"));
-            } else {
-                WifeHandler.INSTANCE.testLaiGeLaoPo(message, sender, group);
-            }
+            WifeHandler.INSTANCE.testLaiGeLaoPo(
+                    event.getMessage().contentToString(),
+                    event.getSender(),
+                    group);
         }
 
         return ListeningStatus.LISTENING;

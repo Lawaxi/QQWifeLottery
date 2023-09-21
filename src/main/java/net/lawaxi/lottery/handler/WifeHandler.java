@@ -34,6 +34,16 @@ public class WifeHandler {
     }
 
     public void testLaiGeLaoPo(String message, Member sender, Group group) {
+        if (message.equalsIgnoreCase("update_star_data")) {
+            group.sendMessage(new At(sender.getId()).plus("已更新成员列表，当前数据总数 " + config.downloadStarData() + " 人"));
+            return;
+        }
+
+        if (message.equals("我的编号")) {
+            group.sendMessage(new At(sender.getId()).plus("" + new User(group.getId(), sender.getId()).index));
+            return;
+        }
+
         for (String o : config.getSysLottery()) {
             if (message.equals(o)) {
                 laiGeLaoPo(sender.getId(), group);
