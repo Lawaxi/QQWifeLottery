@@ -65,7 +65,6 @@ public class WifeHandler {
         int chance = chances.getOrDefault(index, 0);
 
         //免费次数
-        boolean changing = true;
         if (lastTime.containsKey(index)) {
             long between = new Date().getTime() - lastTime.get(index);
             if (between < DateUnit.HOUR.getMillis() * 2) {
@@ -82,7 +81,6 @@ public class WifeHandler {
             }
 
         } else {
-            changing = false;
             lastTime.put(index, DateUtil.offsetHour(new Date(), -2).getTime());
         }
 
@@ -120,7 +118,7 @@ public class WifeHandler {
         NormalMember senseFrom = group.get(she.getSenseFromInGroup(group.getId()));
         group.sendMessage(m.plus(
                 (mem.getStr("i", "0").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
-                        + (changing ? "2小时后更换" : "当前可更换")
+                        + WifeUtil.getChangingTime(new Date().getTime() - lastTime.get(index))
                         + "\n可用特殊次数 " + chance + " 次"
                         + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + she.getSenseInGroup(group.getId()) + "%]"));
     }
