@@ -37,6 +37,6 @@ public class WifeUtil {
         if (new Date().getTime() - nextTime.getTime() >= 0)
             return "当前可更换";
         else
-            return DateUtil.format(nextTime, "HH点mm分ss秒") + "可更换";
+            return "下次更换时间：" + DateUtil.format(nextTime, "HH点mm分ss秒");
     }
 }

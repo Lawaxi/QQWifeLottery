@@ -2,6 +2,8 @@ package net.lawaxi.lottery.models;
 
 import net.lawaxi.lottery.handler.config;
 
+import java.util.Objects;
+
 public class User {
     private static config config;
     public final Long g;
@@ -37,7 +39,7 @@ public class User {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof User) {
-            return ((User) obj).g == g && ((User) obj).m == m;
+            return Objects.equals(((User) obj).g, g) && Objects.equals(((User) obj).m, m);
         }
         return false;
     }
