@@ -21,10 +21,10 @@ public class WifeUtil {
     }
 
     public static String getChangingTime(long bet) {
-        if (bet < DateUnit.SECOND.getMillis())
+        long lef = DateUnit.HOUR.getMillis() * 2 - bet;
+        if (lef < DateUnit.SECOND.getMillis())
             return "当前可更换";
 
-        long lef = DateUnit.HOUR.getMillis() * 2 - bet;
         long hour = Long.valueOf(lef / DateUnit.HOUR.getMillis());
         lef -= DateUnit.HOUR.getMillis() * hour;
         long min = Long.valueOf(lef / DateUnit.MINUTE.getMillis());
