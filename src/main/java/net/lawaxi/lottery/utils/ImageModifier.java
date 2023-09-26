@@ -39,13 +39,26 @@ public class ImageModifier {
         BufferedImage modifiedImage = new BufferedImage(500, 700, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = modifiedImage.createGraphics();
 
+        //底纹
         Color borderColor = getRandomColor();
         g2d.setColor(borderColor);
         g2d.fillRect(0, 0, 500, 700);
 
+        //图片
         Image scaledImage = originalImage.getScaledInstance(300, 400, Image.SCALE_SMOOTH);
         g2d.drawImage(scaledImage, 100, 100, null);
 
+        //花边
+        Area innerEdge = createInnerEdge(modifiedImage.getWidth(), modifiedImage.getHeight());
+
+        Color innerEdgeColor = getRandomSimilarColor(borderColor);
+        g2d.setColor(innerEdgeColor);
+        g2d.fill(innerEdge);
+
+        g2d.setStroke(new BasicStroke(5));
+        g2d.draw(innerEdge);
+
+        //文字
         g2d.setFont(config.font);
         g2d.setColor(Color.WHITE);
         String text = name + "生日快乐";
@@ -55,14 +68,6 @@ public class ImageModifier {
         int y = 500 + 80 + fontMetrics.getHeight();
         g2d.drawString(text, x, y);
 
-        Area innerEdge = createInnerEdge(modifiedImage.getWidth(), modifiedImage.getHeight());
-
-        Color innerEdgeColor = getRandomSimilarColor(borderColor);
-        g2d.setColor(innerEdgeColor);
-        g2d.fill(innerEdge);
-
-        g2d.setStroke(new BasicStroke(5));
-        g2d.draw(innerEdge);
 
         g2d.dispose();
 

@@ -59,7 +59,7 @@ public class config {
             this.starData = JSONUtil.parseArray(FileUtil.readString(this.starDataFile, "UTF-8"));
         }
 
-        font = new Font(s.getStr("birthdayBroadcastFont", "system", "Microsoft YaHei"), Font.PLAIN, 100);
+        font = new Font(s.getStr("birthdayBroadcastFont", "system", "Microsoft YaHei"), Font.PLAIN, 50);
         load();
     }
 
