@@ -18,6 +18,7 @@ import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.utils.ExternalResource;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -155,16 +156,51 @@ public class WifeHandler {
             return;
         }
 
+        //带走次数御三
         String yuSan = "";
         for (int i = 0; i < (report.getWifeTotal() > 3 ? 3 : report.getWifeTotal()); i++) {
             String wife = report.getWives().get(i);
             yuSan += wife + " " + report.getCount(wife) + "次" + " | ";
         }
 
+        //带走情愫（以情愫王的方式）御三
+        String qingSuWang = "您不是任何小偶像的情愫王" + " | ";
+        ArrayList<Wife> wangs = new ArrayList<>();
+        for (Wife wife : config.getWiveModels()) {
+            if (wife.isSenseFrom(group.getId(), sender)) {
+                wangs.add(wife);
+            }
+        }
+        if (wangs.size() > 0) {
+            wangs.sort((wa, wb) -> wb.getSenseInGroup(group.getId()) - wa.getSenseInGroup(group.getId()));
+            qingSuWang = "您是 " + wangs.size() + " 位小偶像的情愫王：\n";
+
+            for (int i = 0; i < (wangs.size() > 3 ? 3 : wangs.size()); i++) {
+                JSONObject wife = config.getStarBySid("" + wangs.get(i).sid);
+                if (wife != null) {
+                    qingSuWang += wife.getStr("s", "未知");
+                } else {
+                    qingSuWang += "未知"; //处理成员被移出名单（毕业）的动态过程
+                }
+                qingSuWang += " " + wangs.get(i).getSenseInGroup(group.getId()) + "% | ";
+            }
+            /*
+            //若不考虑被移出名单的成员，可以考虑下面的方法
+            int count = 0;
+            for (int i = 0; i < wangs.size() && count < 3; i++) {
+                JSONObject wife = config.getStarBySid("" + wangs.get(i).sid);
+                if (wife != null) {
+                    count++;
+                    qingSuWang += wife.getStr("s", "未知") + " " + wangs.get(i).getSenseInGroup(group.getId()) + "% | ";
+                }
+            }*/
+        }
 
         group.sendMessage(new At(sender).plus(
                 "\n累计带走" + report.getWifeTotal() + "人 共" + report.getTotal() + "次\n"
-                        + "带走次数御三：\n" + yuSan.substring(0, yuSan.length() - 3)));
+                        + "带走次数御三：\n" + yuSan.substring(0, yuSan.length() - 3)
+                        + "\n---------\n"
+                        + qingSuWang.substring(0, qingSuWang.length() - 3)));
     }
 
     public void reset() {

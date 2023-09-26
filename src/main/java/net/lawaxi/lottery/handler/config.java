@@ -14,6 +14,7 @@ import java.awt.*;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -104,7 +105,7 @@ public class config {
             for (String group : wive.keySet()) {
                 a.put(Long.valueOf(group), wive.getBeanList(group, Long.class).toArray(new Long[0]));
             }
-            wiveModels.put(Integer.valueOf(sid), new Wife(a));
+            wiveModels.put(Integer.valueOf(sid), new Wife(sid, a));
         }
 
     }
@@ -238,6 +239,16 @@ public class config {
         return starData;
     }
 
+    public JSONObject getStarBySid(String sid) {
+        for (Object o : getStarData()) {
+            JSONObject json = JSONUtil.parseObj(o);
+            if (sid.equals(json.getStr("sid"))) {
+                return json;
+            }
+        }
+        return null;
+    }
+
     //若为成员历史情愫新高则返回true
     public int getHistorySense(int sid, long group) {
         Wife w = this.wiveModels.get(sid);
@@ -250,7 +261,7 @@ public class config {
     public boolean testWifeModel(int sid, User user, int sense) {
         Wife w = this.wiveModels.get(sid);
         if (w == null) {
-            this.wiveModels.put(sid, new Wife(new HashMap<>()));
+            this.wiveModels.put(sid, new Wife(sid, new HashMap<>()));
         } else if (sense <= w.getSenseInGroup(user.g)) {
             return false;
         }
@@ -261,5 +272,9 @@ public class config {
 
     public Wife getWifeModel(int sid) {
         return this.wiveModels.get(sid);
+    }
+
+    public Collection<Wife> getWiveModels() {
+        return wiveModels.values();
     }
 }

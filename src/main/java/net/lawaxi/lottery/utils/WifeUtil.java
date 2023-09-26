@@ -21,7 +21,7 @@ public class WifeUtil {
     }
 
     public static String getChangingTime(long bet) {
-        if (bet <= 0)
+        if (bet < DateUnit.SECOND.getMillis())
             return "当前可更换";
 
         long lef = DateUnit.HOUR.getMillis() * 2 - bet;
