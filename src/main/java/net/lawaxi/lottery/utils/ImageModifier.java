@@ -72,7 +72,7 @@ public class ImageModifier {
         g2d.dispose();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageIO.write(modifiedImage, "jpg", outputStream);
+        ImageIO.write(modifiedImage, "JPEG", outputStream);
         byte[] modifiedImageData = outputStream.toByteArray();
         return new ByteArrayInputStream(modifiedImageData);
     }
@@ -84,10 +84,14 @@ public class ImageModifier {
 
     private static Color getRandomSimilarColor(Color baseColor) {
         Random random = new Random();
-        int r = Math.min(255, baseColor.getRed() + random.nextInt(51) - 25);
-        int g = Math.min(255, baseColor.getGreen() + random.nextInt(51) - 25);
-        int b = Math.min(255, baseColor.getBlue() + random.nextInt(51) - 25);
+        int r = toLegalParameter(baseColor.getRed() + random.nextInt(51) - 25);
+        int g = toLegalParameter(baseColor.getGreen() + random.nextInt(51) - 25);
+        int b = toLegalParameter(baseColor.getBlue() + random.nextInt(51) - 25);
         return new Color(r, g, b);
+    }
+
+    private static int toLegalParameter(int parameter) {
+        return Math.min(255, Math.max(0, parameter));
     }
 
     private static Area createInnerEdge(int width, int height) {
