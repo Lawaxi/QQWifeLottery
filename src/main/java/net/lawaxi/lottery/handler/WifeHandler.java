@@ -216,7 +216,7 @@ public class WifeHandler {
     }
 
     public void offsetUserChance(int index, int offset) {
-        chances.put(index, chances.get(index) + offset);
+        chances.put(index, chances.getOrDefault(index, 0) + offset);
     }
 
 }

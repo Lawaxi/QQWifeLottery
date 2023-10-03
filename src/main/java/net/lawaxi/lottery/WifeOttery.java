@@ -21,7 +21,7 @@ public final class WifeOttery extends JavaPlugin {
     private config config;
 
     private WifeOttery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.9-test5")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeOttery48", "0.1.9-test6")
                 .name("来个老婆48成员版")
                 .author("小d")
                 .build());
