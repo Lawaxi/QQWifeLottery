@@ -1,6 +1,6 @@
 package net.lawaxi.lottery.utils;
 
-import net.lawaxi.lottery.handler.config;
+import net.lawaxi.lottery.manager.config;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

@@ -1,6 +1,7 @@
 package net.lawaxi.lottery.handler;
 
 import cn.hutool.json.JSONObject;
+import net.lawaxi.lottery.manager.config;
 import net.lawaxi.lottery.utils.ImageModifier;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
@@ -12,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class BroadcastSender extends Thread {
-    private static config config;
+    private static net.lawaxi.lottery.manager.config config;
     private final JSONObject star;
 
     public BroadcastSender(JSONObject star) {

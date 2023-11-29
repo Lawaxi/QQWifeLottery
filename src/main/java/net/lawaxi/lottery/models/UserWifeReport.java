@@ -1,40 +1,54 @@
 package net.lawaxi.lottery.models;
 
+import cn.hutool.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class UserWifeReport {
-    public final UserWives userWives;
     private final int total;
-    private final List<String> wives; //降序
+    private final int total_bring;
+    private final List<WifeReport> wives;
+    private final List<WifeReport> wives_sort_by_sense;
 
-    public UserWifeReport(UserWives userWives) {
-        this.userWives = userWives;
+    public UserWifeReport(JSONObject[] userWives) {
+        total = userWives.length;
 
-        wives = new ArrayList<>(userWives.keySet());
-        wives.sort((o1, o2) -> userWives.get(o2) - userWives.get(o1));
+        HashMap<Integer, WifeReport> report = new HashMap<>();
+        for (JSONObject userWife : userWives) {
+            int sense = userWife.getInt("sense");
+            if (sense < 80)
+                continue;
 
-
-        int count = 0;
-        for (String key : userWives.keySet()) {
-            count += userWives.get(key);
+            int sid = userWife.getInt("wife_id");
+            if (report.containsKey(sid)) {
+                report.get(sid).addRecord(sense);
+            } else {
+                report.put(sid, new WifeReport(userWife.getStr("wife_name"), sense));
+            }
         }
-        total = count;
+        wives = new ArrayList<>(report.values());
+        Collections.sort(wives, (w1, w2) -> Integer.compare(w2.count, w1.count));
+        wives_sort_by_sense = new ArrayList<>(wives);
+        Collections.sort(wives_sort_by_sense, (w1, w2) -> Integer.compare(w2.sense, w1.sense));
+        total_bring = wives.size();
     }
 
-    public List<String> getWives() {
+    public List<WifeReport> getWives() {
         return wives;
+    }
+
+    public List<WifeReport> getWivesSortBySense() {
+        return wives_sort_by_sense;
     }
 
     public int getTotal() {
         return total;
     }
 
-    public int getWifeTotal() {
-        return wives.size();
-    }
-
-    public int getCount(String wife) {
-        return userWives.get(wife);
+    public int getTotalBring() {
+        return total_bring;
     }
 }

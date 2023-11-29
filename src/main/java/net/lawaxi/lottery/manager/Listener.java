@@ -1,5 +1,6 @@
-package net.lawaxi.lottery.handler;
+package net.lawaxi.lottery.manager;
 
+import net.lawaxi.lottery.handler.WifeHandler;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.event.EventHandler;
 import net.mamoe.mirai.event.ListeningStatus;
@@ -7,10 +8,10 @@ import net.mamoe.mirai.event.SimpleListenerHost;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 
 public class Listener extends SimpleListenerHost {
-    private static config config;
+    private final config config;
 
-    public static void setConfig(config config) {
-        Listener.config = config;
+    public Listener(config config) {
+        this.config = config;
     }
 
     @EventHandler()
