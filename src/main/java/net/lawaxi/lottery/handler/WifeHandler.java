@@ -1,5 +1,6 @@
 package net.lawaxi.lottery.handler;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -38,33 +39,45 @@ public class WifeHandler {
 
     public void testLaiGeLaoPo(String message, Member sender, Group group) {
         if (message.equalsIgnoreCase("update_star_data")) {
-            group.sendMessage(new At(sender.getId()).plus("已更新成员列表，当前数据总数 " + config.downloadStarData() + " 人"));
+            group.sendMessage(new At(sender.getId()).plus(config.downloadStarData()));
             return;
         }
 
-        if (message.equals("我的编号")) {
-            int user_id = database.getUserIdByNumbers(group.getId(), sender.getId());
+        if (message.equals("我的编号") && testTime(group, sender.getId())) {
+            int user_id = getUserIndex(sender.getId(), group.getId());
             group.sendMessage(new At(sender.getId()).plus("\nuid: " + String.format("%05d", user_id)));
             return;
         }
 
         for (String o : config.getSysLottery()) {
             if (message.equals(o)) {
-                laiGeLaoPo(sender.getId(), group);
+                if(testTime(group, sender.getId())){
+                    laiGeLaoPo(sender.getId(), group);
+                }
                 return;
             }
         }
 
         for (String o : config.getSysData()) {
             if (message.equals(o)) {
-                woDeLaoPo(sender.getId(), group);
+                if(testTime(group, sender.getId())){
+                    woDeLaoPo(sender.getId(), group);
+                }
                 return;
             }
         }
     }
 
+    private boolean testTime(Group group, long senderId){
+        if (new DateTime().getTime() < 1701313200000L) {
+            group.sendMessage(new At(senderId).plus("二周目将于 " + DateUtil.format(new DateTime(1701313200000L), "yyyy年MM月dd日 HH点mm分ss秒") + " 开启，敬请期待"));
+            return false;
+        }
+        return true;
+    }
+
     public void laiGeLaoPo(long sender, Group group) {
-        int user_id = database.getUserIdByNumbers(group.getId(), sender);
+        int user_id = getUserIndex(sender, group.getId());
 
         /* 输出 */
         int chance = chances.getOrDefault(user_id, 0);
@@ -170,7 +183,7 @@ public class WifeHandler {
     }
 
     public void woDeLaoPo(long sender, Group group) {
-        int user_id = database.getUserIdByNumbers(group.getId(), sender);
+        int user_id = getUserIndex(sender, group.getId());
         String out = "";
 
         //UserWifeReport
@@ -215,6 +228,15 @@ public class WifeHandler {
 
     public void reset(int id) {
         lastTime.remove(id);
+    }
+
+    public int getUserIndex(long sender, long group) {
+        return database.getUserIdByNumbers(group, sender);
+    }
+
+    public void offsetUserChance(int index, int offset) {
+        chances.put(index, chances.get(index) + offset);
+        chances.put(index, chances.getOrDefault(index, 0) + offset);
     }
 
 }
