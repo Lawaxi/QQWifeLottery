@@ -22,6 +22,7 @@ public class config {
     private String[] sysData;
     private String[] sysMyId;
     private String[] sysRank;
+    private String[] sysWish;
     private String[] allowGroup;
     private String[] birthdayBroadcastGroup;
 
@@ -36,6 +37,7 @@ public class config {
             s.setByGroup("data", "system", "我的老婆");
             s.setByGroup("myId", "system", "我的编号");
             s.setByGroup("rank", "system", "rank");
+            s.setByGroup("wish", "system", "许愿");
             s.setByGroup("starDataFile", "system", new File(config.getParent(), "star_data").getAbsolutePath());
             s.setByGroup("databaseFile", "system", new File(config.getParent(), "main.db").getAbsolutePath());
             s.setByGroup("birthdayBroadcastFont", "system", "Microsoft YaHei");
@@ -66,6 +68,7 @@ public class config {
         sysData = s.getStrings("data", "system");
         sysMyId = s.getStrings("myId", "system");
         sysRank = s.getStrings("rank", "system");
+        sysWish = s.getStrings("wish", "system");
         if (sysLottery == null)
             sysLottery = new String[]{"来个老婆", "换个老婆"};
         if (sysData == null)
@@ -74,6 +77,8 @@ public class config {
             sysMyId = new String[]{"我的编号"};
         if (sysRank == null)
             sysRank = new String[]{"rank"};
+        if (sysWish == null)
+            sysWish = new String[]{"许愿"};
 
         this.allowGroup = s.getStrings("allowGroups", "permission");
         if (allowGroup == null)
@@ -149,6 +154,10 @@ public class config {
 
     public String[] getSysRank() {
         return sysRank;
+    }
+
+    public String[] getSysWish() {
+        return sysWish;
     }
 
     public boolean doesGroupAllowed(long id) {

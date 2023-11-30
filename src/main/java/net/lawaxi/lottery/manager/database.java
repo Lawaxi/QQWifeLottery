@@ -29,6 +29,16 @@ public class database {
         if (!isTableExists(USERS_TABLE_NAME)) {
             initUsersTable();
         }
+
+        //版本更新 0.2.0-test5
+        if (!isColumnExists(TABLE_NAME, "wish")) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "ALTER TABLE " + TABLE_NAME + " ADD COLUMN wish BOOLEAN DEFAULT FALSE")) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
@@ -51,6 +61,7 @@ public class database {
                     "wife_name TEXT," +
                     "sense INTEGER," +
                     "lottery_time TIMETAMP" +
+                    "wish BOOLEAN," +
                     ")";
             statement.execute(createTableSQL);
 
@@ -83,9 +94,28 @@ public class database {
         }
     }
 
-    public void appendLotteryRecord(long groupNumber, int userId, int wifeId, String wifeName, int sense) {
+    private boolean isColumnExists(String tableName, String columnName) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(
-                "INSERT INTO " + TABLE_NAME + " (group_number, user_id, wife_id, wife_name, sense, lottery_time) VALUES (?, ?, ?, ?, ?, ?)")) {
+                "PRAGMA table_info(" + tableName + ")")) {
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String existingColumnName = resultSet.getString("name");
+                    if (columnName.equals(existingColumnName)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public void appendLotteryRecord(long groupNumber, int userId, int wifeId, String wifeName, int sense, boolean wish) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+                "INSERT INTO " + TABLE_NAME + " (group_number, user_id, wife_id, wife_name, sense, lottery_time, wish) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
 
             preparedStatement.setLong(1, groupNumber);
             preparedStatement.setInt(2, userId);
@@ -93,6 +123,7 @@ public class database {
             preparedStatement.setString(4, wifeName);
             preparedStatement.setInt(5, sense);
             preparedStatement.setLong(6, new DateTime().getTime());
+            preparedStatement.setBoolean(7, wish);
 
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

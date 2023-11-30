@@ -11,6 +11,7 @@ import net.lawaxi.lottery.manager.config;
 import net.lawaxi.lottery.manager.database;
 import net.lawaxi.lottery.models.UserMaxSenseReport;
 import net.lawaxi.lottery.models.UserWifeReport;
+import net.lawaxi.lottery.models.Wish;
 import net.lawaxi.lottery.utils.WifeUtil;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -32,12 +33,14 @@ public class WifeHandler {
     private final config config;
     private final database database;
     private final HashMap<Integer, Long> lastTime = new HashMap<>();
+    private final HashMap<Integer, Wish> wish = new HashMap<>();
     private final HashMap<Integer, Integer> chances = new HashMap<>();
 
     public WifeHandler(net.lawaxi.lottery.manager.config config, database database) {
+        INSTANCE = this;
         this.config = config;
         this.database = database;
-        INSTANCE = this;
+        Wish.setWish(this.wish);
     }
 
     public void testLaiGeLaoPo(String message, Member sender, Group group) {
@@ -60,10 +63,23 @@ public class WifeHandler {
             }
         }
 
-        for (String o : config.getSysMyId()) {
-            if (message.equals(o)) {
-                int user_id = getUserIndex(sender.getId(), group.getId());
-                group.sendMessage(new At(sender.getId()).plus("\nuid: " + String.format("%05d", user_id)));
+        for (String o : config.getSysWish()) {
+            if (message.startsWith(o)) {
+                try {
+                    String target = message.substring(message.indexOf(" ") + 1);
+                    int user_id = getUserIndex(sender.getId(), group.getId());
+                    if (!wish.containsKey(user_id)) {
+                        wish.put(user_id, new Wish(user_id, target));
+                        group.sendMessage(new At(sender.getId()).plus("\n许愿成功：" + target));
+                    } else {
+                        group.sendMessage(new At(sender.getId()).plus("\n您有许愿正在进行，" +
+                                wish.get(user_id).getTimeLast() + "次抽奖未抽中或任何一次抽中后接受新的许愿"));
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    group.sendMessage(new At(sender.getId()).plus("\n许愿格式错误，例：" + o + " 林忆宁"));
+                } catch (Exception e) {
+                    group.sendMessage(new At(sender.getId()).plus("\n许愿功能载入错误"));
+                }
                 return;
             }
         }
@@ -75,6 +91,13 @@ public class WifeHandler {
             }
         }
 
+        for (String o : config.getSysMyId()) {
+            if (message.equals(o)) {
+                int user_id = getUserIndex(sender.getId(), group.getId());
+                group.sendMessage(new At(sender.getId()).plus("\nuid: " + String.format("%05d", user_id)));
+                return;
+            }
+        }
     }
 
     private boolean testTime(Group group, long senderId) {
@@ -119,12 +142,19 @@ public class WifeHandler {
         JSONObject max_sense = database.getMaxSenseRecord(sid, group.getId());
         int hq = max_sense == null ? 0 : max_sense.getInt("sense");
         int q = RandomUtil.randomInt(1, hq < 100 ? 101 : hq + 11);
-        database.appendLotteryRecord(
-                group.getId(),
-                database.getUserIdByNumbers(group.getId(), sender),
-                sid,
-                name,
-                q);
+        String w = "";
+        boolean wi = false;
+        if (wish.containsKey(user_id)) {
+            wi = wish.get(user_id).match(name);
+            if (wi)
+                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + ((q += 10) + 10) + "%！";
+            else {
+                int timeLast = wish.get(user_id).reduce();
+                w = timeLast == 0 ? "\n许愿失败，您可以重新许愿" : "\n当前许愿 " + wish.get(user_id).getTarget() + " 剩余 " + timeLast + " 次";
+            }
+        }
+
+        database.appendLotteryRecord(group.getId(), database.getUserIdByNumbers(group.getId(), sender), sid, name, q, wi);
 
         /* 输出 */
         String dg = mem.getStr("g");
@@ -160,8 +190,9 @@ public class WifeHandler {
         group.sendMessage(m.plus(
                 (mem.getStr("i", "0").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
                         + WifeUtil.getChangingTime(new Date().getTime() - lastTime.get(user_id))
-                        + "\n可用特殊次数 " + chance + " 次"
-                        + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + hq + "%]"));
+                        + (chance == 0 ? "" : "\n可用特殊次数 " + chance + " 次")
+                        + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + hq + "%]"
+                        + w));
     }
 
     private InputStream getRes(String resLoc) {

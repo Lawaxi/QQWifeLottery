@@ -64,7 +64,8 @@ public class MyCommands extends JCompositeCommand {
                         database.getUserIdByNumbers(Long.valueOf(group), sense[0]),
                         Integer.valueOf(key),
                         getStarName(key),
-                        Integer.valueOf("" + sense[1])
+                        Integer.valueOf("" + sense[1]),
+                        false
                 );
             }
         }
