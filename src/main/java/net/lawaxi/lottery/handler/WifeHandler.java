@@ -20,8 +20,11 @@ import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.utils.ExternalResource;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class WifeHandler {
     public static final String APIImage = "https://www.snh48.com/images/member/zp_%s.jpg";
@@ -43,12 +46,6 @@ public class WifeHandler {
             return;
         }
 
-        if (message.equals("我的编号")) {
-            int user_id = getUserIndex(sender.getId(), group.getId());
-            group.sendMessage(new At(sender.getId()).plus("\nuid: " + String.format("%05d", user_id)));
-            return;
-        }
-
         for (String o : config.getSysLottery()) {
             if (message.equals(o)) {
                 laiGeLaoPo(sender.getId(), group);
@@ -62,6 +59,22 @@ public class WifeHandler {
                 return;
             }
         }
+
+        for (String o : config.getSysMyId()) {
+            if (message.equals(o)) {
+                int user_id = getUserIndex(sender.getId(), group.getId());
+                group.sendMessage(new At(sender.getId()).plus("\nuid: " + String.format("%05d", user_id)));
+                return;
+            }
+        }
+
+        for (String o : config.getSysRank()) {
+            if (message.equals(o)) {
+                rank(sender.getId(), group);
+                return;
+            }
+        }
+
     }
 
     private boolean testTime(Group group, long senderId) {
@@ -178,7 +191,7 @@ public class WifeHandler {
 
     public void woDeLaoPo(long sender, Group group) {
         int user_id = getUserIndex(sender, group.getId());
-        String out = "uid: " + String.format("%05d", user_id);
+        String out = "\nuid: " + String.format("%05d", user_id);
 
         //UserWifeReport
         UserWifeReport report = new UserWifeReport(database.getAllRecordsByUserId(user_id));
@@ -188,32 +201,42 @@ public class WifeHandler {
             out += "\n共抽 " + report.getTotal() + " 次，累计带走 " + report.getTotalBring() + " 人"
                     + "\n最高情愫：" + report.getWivesSortBySense().get(0).name + "(" + report.getWivesSortBySense().get(0).sense + "%) " + report.getWivesSortBySense().get(0).count + " 次"
                     + "\n最多次数：" + report.getWives().get(0).name + "(" + report.getWives().get(0).sense + "%) " + report.getWives().get(0).count + " 次";
-
-            /*原御三功能
-            out+="\n";
-            for (int i = 0; i < (report.getTotalBring() > 3 ? 3 : report.getTotalBring()); i++) {
-                String wife = report.getWives().get(i).name;
-                out += wife + " " + report.getWives().get(i).count + "次，最高 " +
-                        report.getWives().get(i).sense + "% | ";
-            }
-            out.substring(0, out.length()-3);*/
         }
 
         //UserMaxSenseReport
-        out += "\n---------\n";
+        out += "\n---------------------------\n";
         UserMaxSenseReport maxSenseReport = new UserMaxSenseReport(database.getAllRecordsThatMaxSense(user_id, group.getId()));
         if (maxSenseReport.getTotal() == 0) {
             out += "您不是任何小偶像的情愫王";
         } else {
-            out += "您是 " + maxSenseReport.getTotal() + " 位小偶像的情愫王：\n";
-            for (int i = 0; i < (maxSenseReport.getTotal() > 3 ? 3 : maxSenseReport.getTotal()); i++) {
-                out += maxSenseReport.getWives().get(i).name
-                        + "(" + maxSenseReport.getWives().get(i).sense + "%)" + " | ";
-            }
-            out = out.substring(0, out.length() - 3);
+            out += "您是 " + maxSenseReport.getTotal() + " 位小偶像的情愫王：\n"
+                    + String.join(" | ", maxSenseReport.getWives().stream()
+                    .limit(3)
+                    .map(rep -> rep.name + "(" + rep.sense + "%)")
+                    .collect(Collectors.toList()));
         }
 
         group.sendMessage(new At(sender).plus(out));
+    }
+
+    public void rank(long sender, Group group) {
+        JSONObject[] records = database.analyseGroupRecords(group.getId());
+
+        if (records.length < 1) {
+            group.sendMessage(new At(sender).plus("本群还没有成功带走老婆的用户"));
+        }
+
+        int max_count = records[0].getInt("count");
+        List<String> resultList = Arrays.stream(records)
+                .limit(5)
+                .map(obj -> {
+                    int bars = Math.min(Math.round(obj.getInt("count") * 10.0f / max_count), obj.getInt("count"));
+                    String barsString = new String(new char[bars]).replace('\0', '▇');
+                    return String.format("%d: %s(%d)", obj.getInt("user_id"), barsString, obj.getInt("count"));
+                })
+                .collect(Collectors.toList());
+
+        group.sendMessage(new At(sender).plus("本群带走老婆次数排名/uid: \n").plus(String.join("\n", resultList)));
     }
 
     public void reset() {
@@ -228,6 +251,7 @@ public class WifeHandler {
         return database.getUserIdByNumbers(group, sender);
     }
 
+    //接口使用，可配合集资插件
     public void offsetUserChance(int index, int offset) {
         chances.put(index, chances.get(index) + offset);
         chances.put(index, chances.getOrDefault(index, 0) + offset);

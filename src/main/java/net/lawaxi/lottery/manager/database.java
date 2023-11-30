@@ -278,4 +278,37 @@ public class database {
         return null;
     }
 
+    public JSONObject[] analyseGroupRecords(long groupNumber) {
+        List<JSONObject> analysisResults = new ArrayList<>();
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(
+                "SELECT t1.user_id, t2.user_number, COUNT(*) AS count " +
+                        "FROM " + TABLE_NAME + " t1 " +
+                        "JOIN " + USERS_TABLE_NAME + " t2 ON t1.user_id = t2.id " +
+                        "WHERE t1.group_number = ? AND t1.sense >= 80 " +
+                        "GROUP BY t1.user_id " +
+                        "ORDER BY count DESC")) {
+
+            preparedStatement.setLong(1, groupNumber);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    int userId = resultSet.getInt("user_id");
+                    long userNumber = resultSet.getLong("user_number");
+                    int count = resultSet.getInt("count");
+
+                    JSONObject analysisResult = new JSONObject()
+                            .put("user_id", userId)
+                            .put("user_number", userNumber)
+                            .put("count", count);
+
+                    analysisResults.add(analysisResult);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return analysisResults.toArray(new JSONObject[0]);
+    }
 }

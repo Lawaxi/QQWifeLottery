@@ -20,6 +20,8 @@ public class config {
     private final File databaseFile;
     private String[] sysLottery;
     private String[] sysData;
+    private String[] sysMyId;
+    private String[] sysRank;
     private String[] allowGroup;
     private String[] birthdayBroadcastGroup;
 
@@ -32,6 +34,8 @@ public class config {
             s = new Setting(config, StandardCharsets.UTF_8, false);
             s.setByGroup("lottery", "system", "来个老婆,换个老婆");
             s.setByGroup("data", "system", "我的老婆");
+            s.setByGroup("myId", "system", "我的编号");
+            s.setByGroup("rank", "system", "rank");
             s.setByGroup("starDataFile", "system", new File(config.getParent(), "star_data").getAbsolutePath());
             s.setByGroup("databaseFile", "system", new File(config.getParent(), "main.db").getAbsolutePath());
             s.setByGroup("birthdayBroadcastFont", "system", "Microsoft YaHei");
@@ -60,10 +64,16 @@ public class config {
     private void load(Setting s) {
         sysLottery = s.getStrings("lottery", "system");
         sysData = s.getStrings("data", "system");
+        sysMyId = s.getStrings("myId", "system");
+        sysRank = s.getStrings("rank", "system");
         if (sysLottery == null)
             sysLottery = new String[]{"来个老婆", "换个老婆"};
         if (sysData == null)
             sysData = new String[]{"我的老婆"};
+        if (sysMyId == null)
+            sysMyId = new String[]{"我的编号"};
+        if (sysRank == null)
+            sysRank = new String[]{"rank"};
 
         this.allowGroup = s.getStrings("allowGroups", "permission");
         if (allowGroup == null)
@@ -131,6 +141,14 @@ public class config {
 
     public String[] getSysData() {
         return sysData;
+    }
+
+    public String[] getSysMyId() {
+        return sysMyId;
+    }
+
+    public String[] getSysRank() {
+        return sysRank;
     }
 
     public boolean doesGroupAllowed(long id) {
