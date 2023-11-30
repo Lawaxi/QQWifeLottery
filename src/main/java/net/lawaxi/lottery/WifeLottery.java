@@ -22,7 +22,7 @@ public final class WifeLottery extends JavaPlugin {
     private config config;
 
     private WifeLottery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.0")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.0-test3")
                 .name("来个老婆48成员版")
                 .author("小d")
                 .build());

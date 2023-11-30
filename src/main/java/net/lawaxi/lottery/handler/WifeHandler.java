@@ -43,7 +43,7 @@ public class WifeHandler {
             return;
         }
 
-        if (message.equals("我的编号") && testTime(group, sender.getId())) {
+        if (message.equals("我的编号")) {
             int user_id = getUserIndex(sender.getId(), group.getId());
             group.sendMessage(new At(sender.getId()).plus("\nuid: " + String.format("%05d", user_id)));
             return;
@@ -51,24 +51,20 @@ public class WifeHandler {
 
         for (String o : config.getSysLottery()) {
             if (message.equals(o)) {
-                if(testTime(group, sender.getId())){
-                    laiGeLaoPo(sender.getId(), group);
-                }
+                laiGeLaoPo(sender.getId(), group);
                 return;
             }
         }
 
         for (String o : config.getSysData()) {
             if (message.equals(o)) {
-                if(testTime(group, sender.getId())){
-                    woDeLaoPo(sender.getId(), group);
-                }
+                woDeLaoPo(sender.getId(), group);
                 return;
             }
         }
     }
 
-    private boolean testTime(Group group, long senderId){
+    private boolean testTime(Group group, long senderId) {
         if (new DateTime().getTime() < 1701313200000L) {
             group.sendMessage(new At(senderId).plus("二周目将于 " + DateUtil.format(new DateTime(1701313200000L), "yyyy年MM月dd日 HH点mm分ss秒") + " 开启，敬请期待"));
             return false;
@@ -153,8 +149,6 @@ public class WifeHandler {
                         + WifeUtil.getChangingTime(new Date().getTime() - lastTime.get(user_id))
                         + "\n可用特殊次数 " + chance + " 次"
                         + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + hq + "%]"));
-
-
     }
 
     private InputStream getRes(String resLoc) {
@@ -184,7 +178,7 @@ public class WifeHandler {
 
     public void woDeLaoPo(long sender, Group group) {
         int user_id = getUserIndex(sender, group.getId());
-        String out = "";
+        String out = "uid: " + String.format("%05d", user_id);
 
         //UserWifeReport
         UserWifeReport report = new UserWifeReport(database.getAllRecordsByUserId(user_id));
@@ -216,7 +210,7 @@ public class WifeHandler {
                 out += maxSenseReport.getWives().get(i).name
                         + "(" + maxSenseReport.getWives().get(i).sense + "%)" + " | ";
             }
-            out.substring(0, out.length() - 3);
+            out = out.substring(0, out.length() - 3);
         }
 
         group.sendMessage(new At(sender).plus(out));
