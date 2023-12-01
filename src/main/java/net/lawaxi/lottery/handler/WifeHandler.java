@@ -1,6 +1,5 @@
 package net.lawaxi.lottery.handler;
 
-import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.RandomUtil;
@@ -32,8 +31,10 @@ public class WifeHandler {
     public static WifeHandler INSTANCE;
     private final config config;
     private final database database;
+    //临时储存
     private final HashMap<Integer, Long> lastTime = new HashMap<>();
     private final HashMap<Integer, Wish> wish = new HashMap<>();
+    private final HashMap<Integer, String> lastWishTarget = new HashMap<>();
     private final HashMap<Integer, Integer> chances = new HashMap<>();
 
     public WifeHandler(net.lawaxi.lottery.manager.config config, database database) {
@@ -41,11 +42,20 @@ public class WifeHandler {
         this.config = config;
         this.database = database;
         Wish.setWish(this.wish);
+        Wish.setLastWishTarget(this.lastWishTarget);
     }
 
     public void testLaiGeLaoPo(String message, Member sender, Group group) {
         if (message.equalsIgnoreCase("update_star_data")) {
             group.sendMessage(new At(sender.getId()).plus(config.downloadStarData()));
+            return;
+        }
+
+        if (message.equals("1")) {
+            int user_id = getUserIndex(sender.getId(), group.getId());
+            if (lastWishTarget.containsKey(user_id)) {
+                wish(user_id, lastWishTarget.get(user_id), sender.getId(), group);
+            }
             return;
         }
 
@@ -68,17 +78,9 @@ public class WifeHandler {
                 try {
                     String target = message.substring(message.indexOf(" ") + 1);
                     int user_id = getUserIndex(sender.getId(), group.getId());
-                    if (!wish.containsKey(user_id)) {
-                        wish.put(user_id, new Wish(user_id, target));
-                        group.sendMessage(new At(sender.getId()).plus("\n许愿成功：" + target));
-                    } else {
-                        group.sendMessage(new At(sender.getId()).plus("\n您有许愿正在进行，" +
-                                wish.get(user_id).getTimeLast() + "次抽奖未抽中或任何一次抽中后接受新的许愿"));
-                    }
+                    wish(user_id, target, sender.getId(), group);
                 } catch (IndexOutOfBoundsException e) {
                     group.sendMessage(new At(sender.getId()).plus("\n许愿格式错误，例：" + o + " 林忆宁"));
-                } catch (Exception e) {
-                    group.sendMessage(new At(sender.getId()).plus("\n许愿功能载入错误"));
                 }
                 return;
             }
@@ -100,12 +102,30 @@ public class WifeHandler {
         }
     }
 
+    /*
     private boolean testTime(Group group, long senderId) {
         if (new DateTime().getTime() < 1701313200000L) {
             group.sendMessage(new At(senderId).plus("二周目将于 " + DateUtil.format(new DateTime(1701313200000L), "yyyy年MM月dd日 HH点mm分ss秒") + " 开启，敬请期待"));
             return false;
         }
         return true;
+    }*/
+
+    public boolean wish(int id, String target, long sender, Group group) {
+        try {
+            if (!wish.containsKey(id)) {
+                wish.put(id, new Wish(id, target));
+                lastWishTarget.remove(id);
+                group.sendMessage(new At(sender).plus("\n许愿成功：" + target));
+                return true;
+            } else {
+                group.sendMessage(new At(sender).plus("\n您有许愿正在进行，" +
+                        wish.get(id).getTimeLast() + "次抽奖未抽中或任何一次抽中后接受新的许愿"));
+            }
+        } catch (Exception e) {
+            group.sendMessage(new At(sender).plus("\n许愿功能载入错误"));
+        }
+        return false;
     }
 
     public void laiGeLaoPo(long sender, Group group) {
@@ -147,10 +167,10 @@ public class WifeHandler {
         if (wish.containsKey(user_id)) {
             wi = wish.get(user_id).match(name);
             if (wi)
-                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + ((q += 10) + 10) + "%！";
+                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + ((q += 10) + 10) + "%！扣1继续相同的许愿。";
             else {
                 int timeLast = wish.get(user_id).reduce();
-                w = timeLast == 0 ? "\n许愿失败，您可以重新许愿" : "\n当前许愿 " + wish.get(user_id).getTarget() + " 剩余 " + timeLast + " 次";
+                w = timeLast == 0 ? "\n许愿失败，您可以重新许愿。扣1继续相同的许愿。" : "\n当前许愿 " + wish.get(user_id).getTarget() + " 剩余 " + timeLast + " 次。";
             }
         }
 
@@ -251,6 +271,7 @@ public class WifeHandler {
     }
 
     public void rank(long sender, Group group) {
+        int user_id = getUserIndex(sender, group.getId());
         JSONObject[] records = database.analyseGroupRecords(group.getId());
 
         if (records.length < 1) {
@@ -260,14 +281,34 @@ public class WifeHandler {
         int max_count = records[0].getInt("count");
         List<String> resultList = Arrays.stream(records)
                 .limit(5)
-                .map(obj -> {
-                    int bars = Math.min(Math.round(obj.getInt("count") * 10.0f / max_count), obj.getInt("count"));
-                    String barsString = new String(new char[bars]).replace('\0', '▇');
-                    return String.format("%d: %s(%d)", obj.getInt("user_id"), barsString, obj.getInt("count"));
-                })
+                .map(obj -> getRankLine(obj.getInt("user_id"), obj.getInt("count"), max_count))
                 .collect(Collectors.toList());
 
-        group.sendMessage(new At(sender).plus("本群带走老婆次数排名/uid: \n").plus(String.join("\n", resultList)));
+        for (int i = 0; i < records.length; i++) {
+            JSONObject obj = records[i];
+            if (user_id == obj.getInt("user_id")) {
+                group.sendMessage(new At(sender).plus("本群带走老婆次数排名/uid: \n"
+                        + String.join("\n", resultList)
+                        + "\n---------------------------\n"
+                        + "您的排名：" + (i + 1) + "\n"
+                        + getRankLine(user_id, obj.getInt("count"), max_count)));
+                return;
+            }
+        }
+
+        group.sendMessage(new At(sender).plus("本群带走老婆次数排名/uid: \n"
+                + String.join("\n", resultList)
+                + "\n---------------------------\n您还没有带走过老婆"));
+    }
+
+    private String getRankLine(int id, int count, int max_count) {
+        int bars = Math.min(Math.round(count * 10.0f / max_count), count);
+        String barsString;
+        if (bars == 0 && count > 0)
+            barsString = "▍";
+        else
+            barsString = new String(new char[bars]).replace('\0', '▉');
+        return String.format("%d: %s(%d)", id, barsString, count);
     }
 
     public void reset() {
