@@ -77,8 +77,15 @@ public class WifeHandler {
             if (message.startsWith(o)) {
                 try {
                     String target = message.substring(message.indexOf(" ") + 1);
-                    int user_id = getUserIndex(sender.getId(), group.getId());
-                    wish(user_id, target, sender.getId(), group);
+                    for (Object star : config.getStarData()) {
+                        if (target.equalsIgnoreCase(JSONUtil.parseObj(star).getStr("s"))) {
+                            int user_id = getUserIndex(sender.getId(), group.getId());
+                            wish(user_id, target, sender.getId(), group);
+                            return;
+                        }
+                    }
+                    group.sendMessage(new At(sender.getId()).plus("\n许愿对象不存在"));
+
                 } catch (IndexOutOfBoundsException e) {
                     group.sendMessage(new At(sender.getId()).plus("\n许愿格式错误，例：" + o + " 林忆宁"));
                 }
