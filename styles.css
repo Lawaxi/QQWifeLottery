@@ -1,0 +1,92 @@
+#resultContainer {
+  margin-top: 20px;
+}
+
+.account-element {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+#id::before{
+      content: "编号：";
+    
+}
+
+#group::before {
+      content: "群号：";
+}
+
+#qid::before {
+      content: "QQ 号：";
+}
+
+.flex-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.flex-item {
+  width: 20%;
+  margin-bottom: 10px;
+}
+
+.count {
+        margin: 2rem 0 0 0;
+}
+
+#topRecords p {
+    font-weight: bold;
+}
+
+.wife-element {
+background-color: #f0f0f0;
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+    flex-wrap: nowrap;
+}
+
+#topWivesContainer, #otherWivesContainer {
+    flex-wrap: nowrap;
+    flex-direction: column;
+}
+
+.member-photo {
+   width: 12rem;
+}
+
+.member-info {
+    display: flex;
+    flex-direction: column;
+        margin-left: 10px;
+}
+
+.member-info p {
+        margin: 0;
+}
+
+#name {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+#sense {
+        margin-bottom: 20px;
+}
+
+#sense::before {
+      content: "最高情愫：";
+}
+
+#team {
+}
+
+#period {
+}
+
+#birthday {
+}
+}
