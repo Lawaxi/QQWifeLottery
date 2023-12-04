@@ -20,10 +20,7 @@ import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.utils.ExternalResource;
 
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class WifeHandler {
@@ -33,16 +30,15 @@ public class WifeHandler {
     private final database database;
     //临时储存
     private final HashMap<Integer, Long> lastTime = new HashMap<>();
-    private final HashMap<Integer, Wish> wish = new HashMap<>();
-    private final HashMap<Integer, String> lastWishTarget = new HashMap<>();
+    private final List<Long> groupUpdate = new ArrayList<>(); //群每日第一
     private final HashMap<Integer, Integer> chances = new HashMap<>();
+    private final HashMap<Integer, Wish> wish = Wish.getWish();
+    private final HashMap<Integer, String> lastWishTarget = Wish.getLastWishTarget();
 
     public WifeHandler(net.lawaxi.lottery.manager.config config, database database) {
         INSTANCE = this;
         this.config = config;
         this.database = database;
-        Wish.setWish(this.wish);
-        Wish.setLastWishTarget(this.lastWishTarget);
     }
 
     public void testLaiGeLaoPo(String message, Member sender, Group group) {
@@ -140,6 +136,7 @@ public class WifeHandler {
 
         /* 输出 */
         int chance = chances.getOrDefault(user_id, 0);
+        boolean first = false;
         if (lastTime.containsKey(user_id)) {
             long between = new Date().getTime() - lastTime.get(user_id);
             if (between < DateUnit.HOUR.getMillis() * 2) {
@@ -156,6 +153,11 @@ public class WifeHandler {
             }
 
         } else {
+            if (!groupUpdate.contains(group.getId())) {
+                groupUpdate.add(group.getId());
+                database.addCoins(user_id, 1, 1, "每日第一！");
+                first = true;
+            }
             lastTime.put(user_id, DateUtil.offsetHour(new Date(), -2).getTime());
         }
 
@@ -173,9 +175,10 @@ public class WifeHandler {
         boolean wi = false;
         if (wish.containsKey(user_id)) {
             wi = wish.get(user_id).match(name);
-            if (wi)
-                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + ((q += 10) + 10) + "%！扣1继续相同的许愿。";
-            else {
+            if (wi) {
+                database.addCoins(user_id, 10, 2, "许愿成功");
+                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + ((q += 10) + 10) + "%！coins+10. 扣1继续相同的许愿。";
+            } else {
                 int timeLast = wish.get(user_id).reduce();
                 w = timeLast == 0 ? "\n许愿失败，您可以重新许愿。扣1继续相同的许愿。" : "\n当前许愿 " + wish.get(user_id).getTarget() + " 剩余 " + timeLast + " 次。";
             }
@@ -187,7 +190,8 @@ public class WifeHandler {
         String dg = mem.getStr("g");
         String dt = mem.getStr("t");
         Message m = new At(sender)
-                .plus(" 今日老婆："
+                .plus((first ? "本日第一！coins+1\n" : "")
+                        + " 今日老婆："
                         + (getGroupName(dg).equalsIgnoreCase(dt) ? getGroupName(dg) : getGroupName(dg) + " Team " + dt)//对于BEJ48/CKG48/IDFT的调整
                         + " " + name + " (" + mem.getStr("n") + ") (" + mem.getStr("p") + ")"
                         + " | 情愫："
@@ -320,6 +324,7 @@ public class WifeHandler {
 
     public void reset() {
         lastTime.clear();
+        groupUpdate.clear();
     }
 
     public void reset(int id) {

@@ -11,6 +11,7 @@ import net.lawaxi.lottery.manager.Listener;
 import net.lawaxi.lottery.manager.MyCommands;
 import net.lawaxi.lottery.manager.config;
 import net.lawaxi.lottery.manager.database;
+import net.lawaxi.lottery.models.Wish;
 import net.lawaxi.lottery.utils.ImageModifier;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
@@ -22,7 +23,7 @@ public final class WifeLottery extends JavaPlugin {
     private config config;
 
     private WifeLottery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.0-test7")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.0-test8")
                 .name("来个老婆48成员版")
                 .author("小d")
                 .build());
@@ -36,6 +37,7 @@ public final class WifeLottery extends JavaPlugin {
 
         if (config.allowed()) {
             GlobalEventChannel.INSTANCE.registerListenerHost(new Listener(config));
+            Wish.initWishList(database);
             new WifeHandler(config, database);
         }
         if (config.allowedBroadcast()) {
