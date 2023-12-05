@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 public class Wish {
     private static final HashMap<Integer, Wish> wish = new HashMap<>();
-    private static final HashMap<Integer, String> lastWishTarget = new HashMap<>();
     private static net.lawaxi.lottery.manager.database database;
     private final int id;
     private final int user_id;
@@ -18,6 +17,7 @@ public class Wish {
         this.id = id;
         this.user_id = user_id;
         this.target = target;
+        wish.put(id, this);
     }
 
     public Wish(int id, int user_id, String target, int remaining_time) {
@@ -33,10 +33,6 @@ public class Wish {
         return wish;
     }
 
-    public static HashMap<Integer, String> getLastWishTarget() {
-        return lastWishTarget;
-    }
-
     public static void initWishList(database db) {
         database = db;
         JSONObject[] wishes = db.getAllOngoingWishes();
@@ -46,13 +42,20 @@ public class Wish {
         }
     }
 
+    public static boolean contains(int user_id) {
+        return wish.containsKey(user_id);
+    }
+
+    public static Wish get(int user_id) {
+        return wish.get(user_id);
+    }
+
     public int reduce() {
         database.reduceWishCount(id);
         time--;
         if (time == 0) {
             database.setWishStatus(id, 0);
             wish.remove(user_id);
-            lastWishTarget.put(user_id, this.target);
         }
         return time;
     }
@@ -61,7 +64,6 @@ public class Wish {
         if (this.target.equals(star_name)) {
             database.setWishStatus(id, 1);
             wish.remove(user_id);
-            lastWishTarget.put(user_id, this.target);
             return true;
         }
         return false;

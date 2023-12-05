@@ -17,7 +17,7 @@ public class config {
     public final JSONArray starData;
     public final Font font;
     private final File starDataFile;
-    private final File databaseFile;
+    private final database database;
     private String[] sysLottery;
     private String[] sysData;
     private String[] sysMyId;
@@ -39,8 +39,16 @@ public class config {
             s.setByGroup("rank", "system", "rank");
             s.setByGroup("wish", "system", "许愿");
             s.setByGroup("starDataFile", "system", new File(config.getParent(), "star_data").getAbsolutePath());
-            s.setByGroup("databaseFile", "system", new File(config.getParent(), "main.db").getAbsolutePath());
             s.setByGroup("birthdayBroadcastFont", "system", "Microsoft YaHei");
+
+            s.setByGroup("driver", "database", "sqlite");
+            s.setByGroup("file", "database", new File(config.getParent(), "main.db").getAbsolutePath());
+            s.setByGroup("host", "database", "");
+            s.setByGroup("post", "database", "");
+            s.setByGroup("database", "database", "");
+            s.setByGroup("account", "database", "");
+            s.setByGroup("password", "database", "");
+
             s.setByGroup("allowGroups", "permission", "");
             s.setByGroup("birthdayBroadcastGroup", "permission", "");
 
@@ -50,7 +58,6 @@ public class config {
         }
         load(s);
         this.starDataFile = new File(s.getStr("starDataFile", "system", new File(config.getParent(), "star_data").getAbsolutePath()));
-        this.databaseFile = new File(s.getStr("databaseFile", "system", new File(config.getParent(), "main.db").getAbsolutePath()));
         this.font = new Font(s.getStr("birthdayBroadcastFont", "system", "Microsoft YaHei"), Font.PLAIN, 50);
 
         //star_data
@@ -60,6 +67,19 @@ public class config {
             downloadStarData();
         } else {
             this.starData = JSONUtil.parseArray(FileUtil.readString(this.starDataFile, "UTF-8"));
+        }
+
+        //database
+        if (s.getStr("driver", "database", "sqlite").equalsIgnoreCase("mysql")) {
+            String host = s.getStr("host", "database", "localhost");
+            int post = s.getInt("post", "database", 3306);
+            String database = s.getStr("database", "database", "wifelottery");
+            String account = s.getStr("account", "database", "");
+            String password = s.getStr("password", "database", "");
+            this.database = new database(net.lawaxi.lottery.manager.database.initConnection(host, post, database, account, password), 1);
+        } else {
+            File databaseFile = new File(s.getStr("file", "database", new File(config.getParent(), "main.db").getAbsolutePath()));
+            this.database = new database(net.lawaxi.lottery.manager.database.initConnection(databaseFile), 0);
         }
     }
 
@@ -132,12 +152,12 @@ public class config {
                 + String.join("", removedMembers);
     }
 
-    public File getDatabaseFile() {
-        return databaseFile;
-    }
-
     public File getStarDataFile() {
         return starDataFile;
+    }
+
+    public net.lawaxi.lottery.manager.database getDatabase() {
+        return database;
     }
 
     public String[] getSysLottery() {

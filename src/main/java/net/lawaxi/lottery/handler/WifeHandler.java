@@ -8,6 +8,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import net.lawaxi.lottery.manager.config;
 import net.lawaxi.lottery.manager.database;
+import net.lawaxi.lottery.models.Chance;
 import net.lawaxi.lottery.models.UserMaxSenseReport;
 import net.lawaxi.lottery.models.UserWifeReport;
 import net.lawaxi.lottery.models.Wish;
@@ -31,9 +32,10 @@ public class WifeHandler {
     //临时储存
     private final HashMap<Integer, Long> lastTime = new HashMap<>();
     private final List<Long> groupUpdate = new ArrayList<>(); //群每日第一
-    private final HashMap<Integer, Integer> chances = new HashMap<>();
-    private final HashMap<Integer, Wish> wish = Wish.getWish();
-    private final HashMap<Integer, String> lastWishTarget = Wish.getLastWishTarget();
+    //wish
+    private final HashMap<Integer, String> lastWishTarget = new HashMap<>();
+    //birthday
+    private final ArrayList<Integer> starInBirthday = new ArrayList<>();
 
     public WifeHandler(net.lawaxi.lottery.manager.config config, database database) {
         INSTANCE = this;
@@ -105,28 +107,20 @@ public class WifeHandler {
         }
     }
 
-    /*
-    private boolean testTime(Group group, long senderId) {
-        if (new DateTime().getTime() < 1701313200000L) {
-            group.sendMessage(new At(senderId).plus("二周目将于 " + DateUtil.format(new DateTime(1701313200000L), "yyyy年MM月dd日 HH点mm分ss秒") + " 开启，敬请期待"));
-            return false;
-        }
-        return true;
-    }*/
-
     public boolean wish(int id, String target, long sender, Group group) {
         try {
-            if (!wish.containsKey(id)) {
-                wish.put(id, new Wish(id, target));
+            if (!Wish.contains(id)) {
+                new Wish(id, target);
                 lastWishTarget.remove(id);
                 group.sendMessage(new At(sender).plus("\n许愿成功：" + target));
                 return true;
             } else {
                 group.sendMessage(new At(sender).plus("\n您有许愿正在进行，" +
-                        wish.get(id).getTimeLast() + "次抽奖未抽中或任何一次抽中后接受新的许愿"));
+                        Wish.get(id).getTimeLast() + "次抽奖未抽中或任何一次抽中后接受新的许愿"));
             }
         } catch (Exception e) {
             group.sendMessage(new At(sender).plus("\n许愿功能载入错误"));
+            e.printStackTrace();
         }
         return false;
     }
@@ -134,16 +128,17 @@ public class WifeHandler {
     public void laiGeLaoPo(long sender, Group group) {
         int user_id = getUserIndex(sender, group.getId());
 
-        /* 输出 */
-        int chance = chances.getOrDefault(user_id, 0);
+        /* 资格判断 */
+        int chance = Chance.getUserChance(user_id);
         boolean first = false;
+        boolean useChance = false;
         if (lastTime.containsKey(user_id)) {
             long between = new Date().getTime() - lastTime.get(user_id);
             if (between < DateUnit.HOUR.getMillis() * 2) {
                 //特殊次数
-                if (chance > 0) {
+                if (chance > 0 && Chance.reduce(user_id) != -1) {
                     chance -= 1;
-                    chances.put(user_id, chance);
+                    useChance = true;
                 } else {
                     group.sendMessage(new At(sender).plus(WifeUtil.getChangingTime(new Date(lastTime.get(user_id)))));
                     return;
@@ -173,14 +168,18 @@ public class WifeHandler {
         int q = RandomUtil.randomInt(1, hq < 100 ? 101 : hq + 11);
         String w = "";
         boolean wi = false;
-        if (wish.containsKey(user_id)) {
-            wi = wish.get(user_id).match(name);
+        if (Wish.contains(user_id)) {
+            String target = Wish.get(user_id).getTarget();
+            wi = Wish.get(user_id).match(name);
             if (wi) {
-                database.addCoins(user_id, 10, 2, "许愿成功");
-                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + ((q += 10) + 10) + "%！coins+10. 扣1继续相同的许愿。";
+                database.addCoins(user_id, 20, 2, "许愿成功");
+                lastWishTarget.put(user_id, target);
+                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + ((q += 10) + 10) + "%！coins+20. 扣1继续相同的许愿。";
             } else {
-                int timeLast = wish.get(user_id).reduce();
-                w = timeLast == 0 ? "\n许愿失败，您可以重新许愿。扣1继续相同的许愿。" : "\n当前许愿 " + wish.get(user_id).getTarget() + " 剩余 " + timeLast + " 次。";
+                int timeLast = Wish.get(user_id).reduce();
+                if (timeLast == 0)
+                    lastWishTarget.put(user_id, target);
+                w = timeLast == 0 ? "\n许愿失败，您可以重新许愿。扣1继续相同的许愿。" : "\n当前许愿 " + Wish.get(user_id).getTarget() + " 剩余 " + timeLast + " 次。";
             }
         }
 
@@ -218,12 +217,20 @@ public class WifeHandler {
                 senseFrom = null;
             }
         }
+
+        //生日
+        boolean birthday = starInBirthday.contains(sid);
+        if (birthday) {
+            database.addCoins(user_id, 20, 3, "在成员生日时抽中");
+        }
+
         group.sendMessage(m.plus(
                 (mem.getStr("i", "0").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
                         + WifeUtil.getChangingTime(new Date().getTime() - lastTime.get(user_id))
-                        + (chance == 0 ? "" : "\n可用特殊次数 " + chance + " 次")
+                        + ((chance == 0 && !useChance) ? "" : "\n" + (useChance ? "使用 1 次，剩余" : "") + "可用抽奖次数 " + chance + " 次")
                         + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + hq + "%]"
-                        + w));
+                        + w
+                        + (birthday ? "\n生日当天抽中成员，coins+20" : "")));
     }
 
     private InputStream getRes(String resLoc) {
@@ -331,14 +338,26 @@ public class WifeHandler {
         lastTime.remove(id);
     }
 
+    public void resetStarInBirthdayList() {
+        this.starInBirthday.clear();
+    }
+
+    public boolean isInBirthday(JSONObject star, String today) {
+        if (today.equals(star.getStr("birthday"))) {
+            this.starInBirthday.add(Integer.valueOf(star.getStr("sid")));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public int getUserIndex(long sender, long group) {
         return database.getUserIdByNumbers(group, sender);
     }
 
     //接口使用，可配合集资插件
-    public void offsetUserChance(int index, int offset) {
-        chances.put(index, chances.get(index) + offset);
-        chances.put(index, chances.getOrDefault(index, 0) + offset);
+    public int offsetUserChance(int user_id, int offset) {
+        return Chance.add(user_id, offset);
     }
 
 }

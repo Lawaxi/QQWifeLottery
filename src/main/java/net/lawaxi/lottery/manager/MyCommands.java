@@ -72,6 +72,15 @@ public class MyCommands extends JCompositeCommand {
         WifeLottery.INSTANCE.getLogger().info("迁移完成。");
     }
 
+
+    @SubCommand({"update"})
+    public void update() {
+        String[] tables = new String[]{"logs", "users", "wish", "coin_log"};
+        for (String table : tables)
+            database.execute("ALTER TABLE " + table + " MODIFY COLUMN id BIGINT AUTO_INCREMENT");
+        WifeLottery.INSTANCE.getLogger().info("升级完成。");
+    }
+
     private String getStarName(String sid) {
         for (Object s : config.starData) {
             JSONObject star = JSONUtil.parseObj(s);

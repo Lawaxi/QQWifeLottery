@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "net.lawaxi"
-version = "0.2.0-test8"
+version = "0.2.0-test9"
 
 repositories {
     maven("https://maven.aliyun.com/repository/public")
@@ -17,4 +17,5 @@ repositories {
 dependencies {
     implementation ("cn.hutool:hutool-all:5.8.2")
     implementation ("org.xerial:sqlite-jdbc:3.34.0")
+    implementation ("mysql:mysql-connector-java:8.0.28")
 }
