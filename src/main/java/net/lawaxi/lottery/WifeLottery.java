@@ -6,6 +6,7 @@ import cn.hutool.cron.Scheduler;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import net.lawaxi.lottery.handler.BroadcastSender;
+import net.lawaxi.lottery.handler.PasswordHandler;
 import net.lawaxi.lottery.handler.WifeHandler;
 import net.lawaxi.lottery.manager.Listener;
 import net.lawaxi.lottery.manager.MyCommands;
@@ -23,9 +24,10 @@ public final class WifeLottery extends JavaPlugin {
     public static final WifeLottery INSTANCE = new WifeLottery();
     private config config;
     private WifeHandler wife;
+    private PasswordHandler password;
 
     private WifeLottery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.0-test9")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.0-test10")
                 .name("来个老婆48成员版")
                 .author("小d")
                 .build());
@@ -35,6 +37,7 @@ public final class WifeLottery extends JavaPlugin {
     public void onEnable() {
         config = new config(resolveConfigFile("config.setting"));
         database database = config.getDatabase();
+        password = config.getPassword();
         MyCommands.setDatabase(database);
 
         if (config.allowed()) {
@@ -85,5 +88,9 @@ public final class WifeLottery extends JavaPlugin {
                 }
         );
         scheduler.start();
+    }
+
+    public PasswordHandler getPassword() {
+        return password;
     }
 }

@@ -6,6 +6,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.Setting;
+import net.lawaxi.lottery.handler.PasswordHandler;
 
 import java.awt.*;
 import java.io.File;
@@ -18,6 +19,7 @@ public class config {
     public final Font font;
     private final File starDataFile;
     private final database database;
+    private final PasswordHandler password;
     private String[] sysLottery;
     private String[] sysData;
     private String[] sysMyId;
@@ -40,6 +42,8 @@ public class config {
             s.setByGroup("wish", "system", "许愿");
             s.setByGroup("starDataFile", "system", new File(config.getParent(), "star_data").getAbsolutePath());
             s.setByGroup("birthdayBroadcastFont", "system", "Microsoft YaHei");
+
+            s.setByGroup("log_round", "password", "12");
 
             s.setByGroup("driver", "database", "sqlite");
             s.setByGroup("file", "database", new File(config.getParent(), "main.db").getAbsolutePath());
@@ -81,6 +85,9 @@ public class config {
             File databaseFile = new File(s.getStr("file", "database", new File(config.getParent(), "main.db").getAbsolutePath()));
             this.database = new database(net.lawaxi.lottery.manager.database.initConnection(databaseFile), 0);
         }
+
+        //password
+        this.password = new PasswordHandler(this.database,s.getInt("log_round", "password", 12));
     }
 
     private void load(Setting s) {
@@ -158,6 +165,10 @@ public class config {
 
     public net.lawaxi.lottery.manager.database getDatabase() {
         return database;
+    }
+
+    public PasswordHandler getPassword() {
+        return password;
     }
 
     public String[] getSysLottery() {

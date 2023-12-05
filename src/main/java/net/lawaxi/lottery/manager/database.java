@@ -53,6 +53,16 @@ public class database {
                 e.printStackTrace();
             }
         }
+
+        //版本更新 0.2.0-test10
+        if (!isColumnExists(USERS_TABLE_NAME, "password")) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN password TEXT")) {
+                preparedStatement.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static Connection initConnection(File databaseFile) {
@@ -91,7 +101,13 @@ public class database {
 
     private void initUsersTable() {
         try (Statement statement = connection.createStatement()) {
-            String createTableSQL = getCreateTableSQL(USERS_TABLE_NAME, "id BIGINT PRIMARY KEY AUTO_INCREMENT, group_number BIGINT, user_number BIGINT, coins INTEGER DEFAULT 0, lottery_entries INTEGER DEFAULT 0");
+            String createTableSQL = getCreateTableSQL(USERS_TABLE_NAME,
+                    "id BIGINT PRIMARY KEY AUTO_INCREMENT, " +
+                            "group_number BIGINT, " +
+                            "user_number BIGINT, " +
+                            "password TEXT, " +
+                            "coins INTEGER DEFAULT 0, " +
+                            "lottery_entries INTEGER DEFAULT 0");
             statement.execute(createTableSQL);
 
         } catch (SQLException e) {
@@ -471,6 +487,22 @@ public class database {
         }
 
         return -1;
+    }
+
+    public boolean changePassword(int userId, String newPlainPassword) {
+        String hashedPassword = WifeLottery.INSTANCE.getPassword().hashPassword(newPlainPassword);
+
+        String sql = "UPDATE " + USERS_TABLE_NAME + " SET password = ? WHERE id = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, hashedPassword);
+            preparedStatement.setInt(2, userId);
+            preparedStatement.executeUpdate();
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public int applyWish(int userId, String wishTarget, int count) {
