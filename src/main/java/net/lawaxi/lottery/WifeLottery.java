@@ -27,7 +27,7 @@ public final class WifeLottery extends JavaPlugin {
     private PasswordHandler password;
 
     private WifeLottery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.0-test11")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.0-test12")
                 .name("来个老婆48成员版")
                 .author("小d圆赐名")
                 .build());

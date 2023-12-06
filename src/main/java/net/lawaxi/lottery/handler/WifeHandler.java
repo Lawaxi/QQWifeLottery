@@ -191,7 +191,7 @@ public class WifeHandler {
         String dg = mem.getStr("g");
         String dt = mem.getStr("t");
         Message m = new At(sender)
-                .plus((first ? "本日第一！coins+1\n" : "")
+                .plus((first ? "本日第一！coins+20\n" : "")
                         + " 今日老婆："
                         + (getGroupName(dg).equalsIgnoreCase(dt) ? getGroupName(dg) : getGroupName(dg) + " Team " + dt)//对于BEJ48/CKG48/IDFT的调整
                         + " " + name + " (" + mem.getStr("n") + ") (" + mem.getStr("p") + ")"
@@ -360,6 +360,10 @@ public class WifeHandler {
     //接口使用，可配合集资插件
     public int offsetUserChance(int user_id, int offset) {
         return Chance.add(user_id, offset);
+    }
+
+    public void offsetCoins(int user_id, int offset, int reason_code, String reason) {
+        database.addCoins(user_id, offset, reason_code, reason);
     }
 
 }

@@ -33,7 +33,7 @@ public class Listener extends SimpleListenerHost {
     @EventHandler()
     public ListeningStatus onUserMessage(UserMessageEvent event) {
         String m = event.getMessage().contentToString();
-        if (m.startsWith("修改密码")) {
+        if (m.startsWith("修改密码 ")) {
             WifeLottery.INSTANCE.getPassword().testChangePassword(m, event.getSender());
         }
 

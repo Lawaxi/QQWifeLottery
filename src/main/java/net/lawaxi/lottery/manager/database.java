@@ -301,6 +301,7 @@ public class database {
     }
 
     private JSONObject constructJSONObject(ResultSet resultSet) throws SQLException {
+        Timestamp time = resultSet.getTimestamp("lottery_time");
         return new JSONObject()
                 .put("id", resultSet.getInt("id"))
                 .put("group_number", resultSet.getLong("group_number"))
@@ -308,7 +309,7 @@ public class database {
                 .put("wife_id", resultSet.getInt("wife_id"))
                 .put("wife_name", resultSet.getString("wife_name"))
                 .put("sense", resultSet.getInt("sense"))
-                .put("lottery_time", resultSet.getTimestamp("lottery_time").getTime());
+                .put("lottery_time", time == null ? 0L : time.getTime());
     }
 
     public int getUserIdByNumbers(long groupNumber, long userNumber) {
@@ -411,15 +412,17 @@ public class database {
         return 0;
     }
 
-    public void addCoins(int userId, int amount, int reasonCategory, String reasonDetails) {
+    public boolean addCoins(int userId, int amount, int reasonCategory, String reasonDetails) {
         String sql = "UPDATE " + USERS_TABLE_NAME + " SET coins = coins + ? WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, amount);
             preparedStatement.setInt(2, userId);
             preparedStatement.executeUpdate();
             logCoinChange(userId, amount, reasonCategory, reasonDetails);
+            return true;
         } catch (SQLException e) {
             WifeLottery.INSTANCE.getLogger().warning("Error adding coins for user " + userId + ": " + e.getMessage());
+            return false;
         }
     }
 
