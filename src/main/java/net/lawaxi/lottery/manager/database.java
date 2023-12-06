@@ -308,7 +308,7 @@ public class database {
                 .put("wife_id", resultSet.getInt("wife_id"))
                 .put("wife_name", resultSet.getString("wife_name"))
                 .put("sense", resultSet.getInt("sense"))
-                .put("lottery_time", resultSet.getLong("lottery_time"));
+                .put("lottery_time", resultSet.getTimestamp("lottery_time").getTime());
     }
 
     public int getUserIdByNumbers(long groupNumber, long userNumber) {

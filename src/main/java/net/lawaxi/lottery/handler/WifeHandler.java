@@ -150,7 +150,7 @@ public class WifeHandler {
         } else {
             if (!groupUpdate.contains(group.getId())) {
                 groupUpdate.add(group.getId());
-                database.addCoins(user_id, 1, 1, "每日第一！");
+                database.addCoins(user_id, 20, 1, "每日第一！");
                 first = true;
             }
             lastTime.put(user_id, DateUtil.offsetHour(new Date(), -2).getTime());
@@ -166,6 +166,8 @@ public class WifeHandler {
         JSONObject max_sense = database.getMaxSenseRecord(sid, group.getId());
         int hq = max_sense == null ? 0 : max_sense.getInt("sense");
         int q = RandomUtil.randomInt(1, hq < 100 ? 101 : hq + 11);
+        if (q > 79)
+            database.addCoins(user_id, 1, 4, "带走老婆");
         String w = "";
         boolean wi = false;
         if (Wish.contains(user_id)) {
@@ -179,7 +181,7 @@ public class WifeHandler {
                 int timeLast = Wish.get(user_id).reduce();
                 if (timeLast == 0)
                     lastWishTarget.put(user_id, target);
-                w = timeLast == 0 ? "\n许愿失败，您可以重新许愿。扣1继续相同的许愿。" : "\n当前许愿 " + Wish.get(user_id).getTarget() + " 剩余 " + timeLast + " 次。";
+                w = timeLast == 0 ? "\n许愿失败，您可以重新许愿。扣1继续相同的许愿。" : "\n当前许愿 " + target + " 剩余 " + timeLast + " 次。";
             }
         }
 

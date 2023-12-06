@@ -17,7 +17,7 @@ public class Wish {
         this.id = id;
         this.user_id = user_id;
         this.target = target;
-        wish.put(id, this);
+        wish.put(user_id, this);
     }
 
     public Wish(int id, int user_id, String target, int remaining_time) {

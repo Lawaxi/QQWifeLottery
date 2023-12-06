@@ -87,7 +87,7 @@ public class config {
         }
 
         //password
-        this.password = new PasswordHandler(this.database,s.getInt("log_round", "password", 12));
+        this.password = new PasswordHandler(this.database, s.getInt("log_round", "password", 12));
     }
 
     private void load(Setting s) {
