@@ -7,6 +7,7 @@ import net.lawaxi.lottery.WifeLottery;
 import net.lawaxi.lottery.handler.WifeHandler;
 import net.mamoe.mirai.console.command.java.JCompositeCommand;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 public class MyCommands extends JCompositeCommand {
@@ -34,7 +35,9 @@ public class MyCommands extends JCompositeCommand {
 
     @SubCommand({"migrate"})
     public void migrate() {
-        Setting s = new Setting(WifeLottery.INSTANCE.resolveConfigFile("config.setting"), StandardCharsets.UTF_8, false);
+        File formerConfig = new File(new File(WifeLottery.INSTANCE.getConfigFolder()
+                .getParentFile(), "net.lawaxi.wifeOttery48"), "config.setting");
+        Setting s = new Setting(formerConfig, StandardCharsets.UTF_8, false);
          /*
         JSONArray users = JSONUtil.parseArray(s.getStr("users", "users", "[]"));
         int between = -2;
@@ -54,7 +57,7 @@ public class MyCommands extends JCompositeCommand {
             }
         }*/
 
-        JSONObject wives = JSONUtil.parseObj(s.getStr("sense", "wives", "[]"));
+        JSONObject wives = JSONUtil.parseObj(s.getStr("sense", "wives", "{}"));
         for (String key : wives.keySet()) {
             JSONObject wife = wives.getJSONObject(key);
             for (String group : wife.keySet()) {
@@ -75,10 +78,14 @@ public class MyCommands extends JCompositeCommand {
 
     @SubCommand({"update"})
     public void update() {
-        String[] tables = new String[]{"logs", "users", "wish", "coin_log"};
-        for (String table : tables)
-            database.execute("ALTER TABLE " + table + " MODIFY COLUMN id BIGINT AUTO_INCREMENT");
-        WifeLottery.INSTANCE.getLogger().info("升级完成。");
+        if (database.isSQLite()) {
+            WifeLottery.INSTANCE.getLogger().info("暂不支持SQLite使用BIGINT，请使用MySQL。");
+        } else {
+            String[] tables = new String[]{"logs", "users", "wish", "coin_log"};
+            for (String table : tables)
+                database.execute("ALTER TABLE " + table + " MODIFY COLUMN id BIGINT AUTO_INCREMENT");
+            WifeLottery.INSTANCE.getLogger().info("升级完成。");
+        }
     }
 
     private String getStarName(String sid) {

@@ -25,6 +25,7 @@ public class database {
         initCoinLogTable();
 
         //版本更新 0.2.0-test5
+        //增加wish列
         if (!isColumnExists(TABLE_NAME, "wish")) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "ALTER TABLE " + TABLE_NAME + " ADD COLUMN wish BOOLEAN DEFAULT FALSE")) {
@@ -35,6 +36,7 @@ public class database {
         }
 
         //版本更新 0.2.0-test8
+        //增加coins列
         if (!isColumnExists(USERS_TABLE_NAME, "coins")) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN coins INTEGER DEFAULT 0")) {
@@ -45,6 +47,7 @@ public class database {
         }
 
         //版本更新 0.2.0-test9
+        //增加lottery_entries列
         if (!isColumnExists(USERS_TABLE_NAME, "lottery_entries")) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN lottery_entries INTEGER DEFAULT 0")) {
@@ -55,6 +58,7 @@ public class database {
         }
 
         //版本更新 0.2.0-test10
+        //增加password列
         if (!isColumnExists(USERS_TABLE_NAME, "password")) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "ALTER TABLE " + USERS_TABLE_NAME + " ADD COLUMN password TEXT")) {
@@ -87,6 +91,10 @@ public class database {
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException("Error initializing database connection.", e);
         }
+    }
+
+    public boolean isSQLite() {
+        return driver == 0;
     }
 
     private void initDatabase() {
@@ -138,6 +146,8 @@ public class database {
     private String getCreateTableSQL(String tableName, String tableColumns) {
         if (driver == 0) {
             // SQLite
+            tableColumns = tableColumns.replace("BIGINT PRIMARY KEY AUTO_INCREMENT", "INTEGER PRIMARY KEY AUTOINCREMENT");
+            tableColumns = tableColumns.replace("AUTO_INCREMENT", "AUTOINCREMENT");
             return "CREATE TABLE IF NOT EXISTS " + tableName + " (" + tableColumns + ")";
         } else if (driver == 1) {
             // MySQL
