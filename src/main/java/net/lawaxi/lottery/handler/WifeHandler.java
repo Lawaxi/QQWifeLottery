@@ -307,10 +307,22 @@ public class WifeHandler {
         for (int i = 0; i < records.length; i++) {
             JSONObject obj = records[i];
             if (user_id == obj.getInt("user_id")) {
+                String rt = "您的排名：1";
+                if (i != 0) {
+                    for (int j = i - 1; j >= 0; j--) {
+                        JSONObject fobj = records[i];
+                        int bet = fobj.getInt("count") - obj.getInt("count");
+                        if (bet == 0) {
+                            rt = "您的排名：" + (j + 2) + "，距离上一名差(" + bet + ")";
+                            break;
+                        }
+                    }
+                }
+
                 group.sendMessage(new At(sender).plus("本群带走老婆次数排名/uid: \n"
                         + String.join("\n", resultList)
                         + "\n---------------------------\n"
-                        + "您的排名：" + (i + 1) + "\n"
+                        + rt + "\n"
                         + getRankLine(user_id, obj.getInt("count"), max_count)));
                 return;
             }
