@@ -8,10 +8,10 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import net.lawaxi.lottery.manager.config;
 import net.lawaxi.lottery.manager.database;
-import net.lawaxi.lottery.models.Chance;
 import net.lawaxi.lottery.models.UserMaxSenseReport;
 import net.lawaxi.lottery.models.UserWifeReport;
 import net.lawaxi.lottery.models.Wish;
+import net.lawaxi.lottery.utils.Chance;
 import net.lawaxi.lottery.utils.WifeUtil;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.Member;
@@ -377,5 +377,4 @@ public class WifeHandler {
     public void offsetCoins(int user_id, int offset, int reason_code, String reason) {
         database.addCoins(user_id, offset, reason_code, reason);
     }
-
 }

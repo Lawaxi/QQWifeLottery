@@ -1,4 +1,4 @@
-package net.lawaxi.lottery.models;
+package net.lawaxi.lottery.utils;
 
 import net.lawaxi.lottery.manager.database;
 

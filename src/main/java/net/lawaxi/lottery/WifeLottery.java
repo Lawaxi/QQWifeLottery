@@ -12,8 +12,8 @@ import net.lawaxi.lottery.manager.Listener;
 import net.lawaxi.lottery.manager.MyCommands;
 import net.lawaxi.lottery.manager.config;
 import net.lawaxi.lottery.manager.database;
-import net.lawaxi.lottery.models.Chance;
 import net.lawaxi.lottery.models.Wish;
+import net.lawaxi.lottery.utils.Chance;
 import net.lawaxi.lottery.utils.ImageModifier;
 import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
@@ -27,7 +27,7 @@ public final class WifeLottery extends JavaPlugin {
     private PasswordHandler password;
 
     private WifeLottery() {
-        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.1-test2")
+        super(new JvmPluginDescriptionBuilder("net.lawaxi.wifeLottery48", "0.2.1-test3")
                 .name("来个老婆48成员版")
                 .author("小d圆赐名")
                 .build());

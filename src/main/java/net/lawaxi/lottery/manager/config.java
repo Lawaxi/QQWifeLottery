@@ -1,5 +1,6 @@
 package net.lawaxi.lottery.manager;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONArray;
@@ -10,7 +11,13 @@ import net.lawaxi.lottery.handler.PasswordHandler;
 
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class config {
@@ -117,6 +124,14 @@ public class config {
 
     public String downloadStarData() {
         JSONArray originalStarData = new JSONArray(this.starData);
+        String lastTime = "-ori";
+        try {
+            FileTime t = Files.readAttributes(this.starDataFile.toPath(), BasicFileAttributes.class)
+                    .lastModifiedTime();
+            lastTime = DateUtil.format(new Date(t.toMillis()), "-yyyyMMdd");
+        } catch (IOException e) {
+
+        }
         this.starData.clear();
 
         this.starData.add(JSONUtil.parse("{\"s\":\"鞠婧祎\",\"sid\":\"10027\",\"n\":\"小鞠\",\"g\":\"明星殿堂\",\"t\":\"\",\"p\":\"SNH48 二期生\",\"i\":\"0\",\"birthday\":\"06.18\"}"));
@@ -142,21 +157,36 @@ public class config {
 
         FileUtil.writeString(starData.toString(), starDataFile, "UTF-8");
 
+        AtomicBoolean changed = new AtomicBoolean(false);
+
         java.util.List<String> addedMembers = this.starData.stream()
                 .filter(updatedMember -> originalStarData.stream()
                         .noneMatch(originalMember -> ((JSONObject) originalMember).getStr("sid").equals(((JSONObject) updatedMember).getStr("sid"))))
-                .map(updatedMember -> "\n+ " + ((JSONObject) updatedMember).getStr("s"))
+                .map(updatedMember -> {
+                    changed.set(true);
+                    return "\n+ " + ((JSONObject) updatedMember).getStr("s");
+                })
                 .collect(Collectors.toList());
 
         java.util.List<String> removedMembers = originalStarData.stream()
                 .filter(originalMember -> this.starData.stream()
                         .noneMatch(updatedMember -> ((JSONObject) updatedMember).getStr("sid").equals(((JSONObject) originalMember).getStr("sid"))))
-                .map(originalMember -> "\n- " + ((JSONObject) originalMember).getStr("s"))
+                .map(originalMember -> {
+                    changed.set(true);
+                    return "\n- " + ((JSONObject) originalMember).getStr("s");
+                })
                 .collect(Collectors.toList());
 
-        return "已更新成员列表，当前数据总数 " + this.starData.size() + " 人"
-                + String.join("", addedMembers)
-                + String.join("", removedMembers);
+        if (changed.get()) {
+            String backupFile = starDataFile.getPath() + lastTime;
+            FileUtil.writeString(originalStarData.toString(), backupFile, "UTF-8");
+            return "已更新成员列表，当前数据总数 " + this.starData.size() + " 人"
+                    + String.join("", addedMembers)
+                    + String.join("", removedMembers)
+                    + "\n旧数据已备份至" + backupFile;
+        } else {
+            return "成员列表已是最新，当前数据总数 " + this.starData.size() + " 人";
+        }
     }
 
     public File getStarDataFile() {

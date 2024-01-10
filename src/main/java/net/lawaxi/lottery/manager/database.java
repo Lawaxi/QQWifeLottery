@@ -199,12 +199,12 @@ public class database {
         return false;
     }
 
-    public void appendLotteryRecord(long groupNumber, int userId, int wifeId, String wifeName, int sense, boolean wish) {
+    public void appendLotteryRecord(long groupNumber, long userId, int wifeId, String wifeName, int sense, boolean wish) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 "INSERT INTO " + TABLE_NAME + " (group_number, user_id, wife_id, wife_name, sense, wish) VALUES (?, ?, ?, ?, ?, ?)")) {
 
             preparedStatement.setLong(1, groupNumber);
-            preparedStatement.setInt(2, userId);
+            preparedStatement.setLong(2, userId);
             preparedStatement.setInt(3, wifeId);
             preparedStatement.setString(4, wifeName);
             preparedStatement.setInt(5, sense);
@@ -249,11 +249,11 @@ public class database {
         return null; // 未被抽到过
     }
 
-    public JSONObject[] getAllRecordsByUserId(int userId) {
+    public JSONObject[] getAllRecordsByUserId(long userId) {
         List<JSONObject> resultList = new ArrayList<>();
         String sql = "SELECT * FROM " + TABLE_NAME + " WHERE user_id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, userId);
+            preparedStatement.setLong(1, userId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     resultList.add(constructJSONObject(resultSet));
@@ -265,7 +265,7 @@ public class database {
         return resultList.toArray(new JSONObject[0]);
     }
 
-    public JSONObject[] getAllRecordsThatMaxSense(int userId, long groupNumber) {
+    public JSONObject[] getAllRecordsThatMaxSense(long userId, long groupNumber) {
         List<JSONObject> resultList = new ArrayList<>();
         String sql = "SELECT * FROM " + TABLE_NAME +
                 " WHERE group_number = ? AND user_id = ?" +
@@ -278,9 +278,9 @@ public class database {
                 ")";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, groupNumber);
-            preparedStatement.setInt(2, userId);
+            preparedStatement.setLong(2, userId);
             preparedStatement.setLong(3, groupNumber);
-            preparedStatement.setInt(4, userId);
+            preparedStatement.setLong(4, userId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     resultList.add(constructJSONObject(resultSet));
@@ -359,10 +359,10 @@ public class database {
         }
     }
 
-    public JSONObject getUserDetailsById(int userId) {
+    public JSONObject getUserDetailsById(long userId) {
         String sql = "SELECT group_number, user_number FROM " + USERS_TABLE_NAME + " WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, userId);
+            preparedStatement.setLong(1, userId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     long groupNumber = resultSet.getLong("group_number");
@@ -390,7 +390,7 @@ public class database {
             preparedStatement.setLong(1, groupNumber);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    int userId = resultSet.getInt("user_id");
+                    long userId = resultSet.getInt("user_id");
                     long userNumber = resultSet.getLong("user_number");
                     int count = resultSet.getInt("count");
                     JSONObject analysisResult = new JSONObject()
@@ -406,11 +406,11 @@ public class database {
         return analysisResults.toArray(new JSONObject[0]);
     }
 
-    public int getCoins(int userId) {
+    public int getCoins(long userId) {
         // 获取金币数
         String sql = "SELECT coins FROM " + USERS_TABLE_NAME + " WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, userId);
+            preparedStatement.setLong(1, userId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getInt("coins");
@@ -422,11 +422,11 @@ public class database {
         return 0;
     }
 
-    public boolean addCoins(int userId, int amount, int reasonCategory, String reasonDetails) {
+    public boolean addCoins(long userId, int amount, int reasonCategory, String reasonDetails) {
         String sql = "UPDATE " + USERS_TABLE_NAME + " SET coins = coins + ? WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, amount);
-            preparedStatement.setInt(2, userId);
+            preparedStatement.setLong(2, userId);
             preparedStatement.executeUpdate();
             logCoinChange(userId, amount, reasonCategory, reasonDetails);
             return true;
@@ -436,11 +436,11 @@ public class database {
         }
     }
 
-    public boolean spendCoins(int userId, int amount, int reasonCategory, String reasonDetails) {
+    public boolean spendCoins(long userId, int amount, int reasonCategory, String reasonDetails) {
         String sql = "UPDATE " + USERS_TABLE_NAME + " SET coins = coins - ? WHERE id = ? AND coins >= ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, amount);
-            preparedStatement.setInt(2, userId);
+            preparedStatement.setLong(2, userId);
             preparedStatement.setInt(3, amount);
             int rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated > 0) {
@@ -455,10 +455,10 @@ public class database {
         return false;
     }
 
-    public int getLotteryEntries(int userId) {
+    public int getLotteryEntries(long userId) {
         String sql = "SELECT lottery_entries FROM " + USERS_TABLE_NAME + " WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, userId);
+            preparedStatement.setLong(1, userId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     return resultSet.getInt("lottery_entries");
@@ -471,11 +471,11 @@ public class database {
         return 0;
     }
 
-    public int addLotteryEntries(int userId, int entries) {
+    public int addLotteryEntries(long userId, int entries) {
         String sql = "UPDATE " + USERS_TABLE_NAME + " SET lottery_entries = lottery_entries + ? WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, entries);
-            preparedStatement.setInt(2, userId);
+            preparedStatement.setLong(2, userId);
             preparedStatement.executeUpdate();
 
             return getLotteryEntries(userId);
@@ -486,11 +486,11 @@ public class database {
         return -1;
     }
 
-    public int spendLotteryEntries(int userId, int entries) {
+    public int spendLotteryEntries(long userId, int entries) {
         String sql = "UPDATE " + USERS_TABLE_NAME + " SET lottery_entries = lottery_entries - ? WHERE id = ? AND lottery_entries >= ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, entries);
-            preparedStatement.setInt(2, userId);
+            preparedStatement.setLong(2, userId);
             preparedStatement.setInt(3, entries);
             int rowsUpdated = preparedStatement.executeUpdate();
 
@@ -502,13 +502,13 @@ public class database {
         return -1;
     }
 
-    public boolean changePassword(int userId, String newPlainPassword) {
+    public boolean changePassword(long userId, String newPlainPassword) {
         String hashedPassword = WifeLottery.INSTANCE.getPassword().hashPassword(newPlainPassword);
 
         String sql = "UPDATE " + USERS_TABLE_NAME + " SET password = ? WHERE id = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, hashedPassword);
-            preparedStatement.setInt(2, userId);
+            preparedStatement.setLong(2, userId);
             preparedStatement.executeUpdate();
             return true;
 
@@ -518,13 +518,13 @@ public class database {
         return false;
     }
 
-    public int applyWish(int userId, String wishTarget, int count) {
+    public int applyWish(long userId, String wishTarget, int count) {
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 "INSERT INTO " + WISH_TABLE_NAME + " (user_id, wish_target, wish_status, remaining_count) " +
                         "VALUES (?, ?, 2, ?)",
                 PreparedStatement.RETURN_GENERATED_KEYS)) {
 
-            preparedStatement.setInt(1, userId);
+            preparedStatement.setLong(1, userId);
             preparedStatement.setString(2, wishTarget);
             preparedStatement.setInt(3, count);
             preparedStatement.executeUpdate();
@@ -577,7 +577,7 @@ public class database {
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
                     int wishId = resultSet.getInt("id");
-                    int userId = resultSet.getInt("user_id");
+                    long userId = resultSet.getInt("user_id");
                     String wishTarget = resultSet.getString("wish_target");
                     int remainingCount = resultSet.getInt("remaining_count");
 
@@ -597,12 +597,12 @@ public class database {
         return ongoingWishes.toArray(new JSONObject[0]);
     }
 
-    private void logCoinChange(int userId, int amount, int reasonCategory, String reasonDetails) {
+    private void logCoinChange(long userId, int amount, int reasonCategory, String reasonDetails) {
         // 记录金币变动
         try (PreparedStatement preparedStatement = connection.prepareStatement(
                 "INSERT INTO " + COIN_LOG_TABLE_NAME + " (user_id, amount, reason_category, reason_details) VALUES (?, ?, ?, ?)")) {
 
-            preparedStatement.setInt(1, userId);
+            preparedStatement.setLong(1, userId);
             preparedStatement.setInt(2, amount);
             preparedStatement.setInt(3, reasonCategory);
             preparedStatement.setString(4, reasonDetails);
