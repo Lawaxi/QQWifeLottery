@@ -176,12 +176,12 @@ public class WifeHandler {
             if (wi) {
                 database.addCoins(user_id, 20, 2, "许愿成功");
                 lastWishTarget.put(user_id, target);
-                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + ((q += 10) + 10) + "%！coins+20. 扣1继续相同的许愿。";
+                w = "\n许愿成功：本次情愫 " + q + "% 增加为 " + (q += 10) + "%！coins+20. 扣1继续相同的许愿。";
             } else {
                 int timeLast = Wish.get(user_id).reduce();
                 if (timeLast == 0)
                     lastWishTarget.put(user_id, target);
-                w = timeLast == 0 ? "\n许愿失败，您可以重新许愿。扣1继续相同的许愿。" : "\n当前许愿 " + target + " 剩余 " + timeLast + " 次。";
+                w = timeLast == 0 ? "\n许愿 " + target + " 失败，您可以重新许愿。扣1继续相同的许愿。" : "\n当前许愿 " + target + " 剩余 " + timeLast + " 次。";
             }
         }
 
