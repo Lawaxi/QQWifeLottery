@@ -20,8 +20,8 @@ public class WifeUtil {
         return "下辈子吧";
     }
 
-    public static String getChangingTime(long bet) {
-        long lef = DateUnit.HOUR.getMillis() * 2 - bet;
+    public static String getChangingTimeBet(long lastTime) {
+        long lef = DateUnit.HOUR.getMillis() * 2 - new Date().getTime() + lastTime;
         if (lef < DateUnit.SECOND.getMillis())
             return "当前可更换";
 
@@ -33,8 +33,8 @@ public class WifeUtil {
         return hour + "小时" + min + "分钟" + sec + "秒后可更换";
     }
 
-    public static String getChangingTime(Date lastTime) {
-        Date nextTime = DateUtil.offsetHour(lastTime, 2);
+    public static String getChangingTime(long lastTime) {
+        Date nextTime = DateUtil.offsetHour(new Date(lastTime), 2);
         if (new Date().getTime() - nextTime.getTime() >= 0)
             return "当前可更换";
         else

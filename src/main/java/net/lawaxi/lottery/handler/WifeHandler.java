@@ -140,7 +140,7 @@ public class WifeHandler {
                     chance -= 1;
                     useChance = true;
                 } else {
-                    group.sendMessage(new At(sender).plus(WifeUtil.getChangingTime(new Date(lastTime.get(user_id)))));
+                    group.sendMessage(new At(sender).plus(WifeUtil.getChangingTimeBet(lastTime.get(user_id))));
                     return;
                 }
             } else {
@@ -228,7 +228,7 @@ public class WifeHandler {
 
         group.sendMessage(m.plus(
                 (mem.getStr("i", "0").equals("0") ? "" : "\n口袋ID: " + mem.getStr("i")) + "\n"
-                        + WifeUtil.getChangingTime(new Date().getTime() - lastTime.get(user_id))
+                        + WifeUtil.getChangingTime(lastTime.get(user_id))
                         + ((chance == 0 && !useChance) ? "" : "\n" + (useChance ? "使用 1 次，剩余" : "") + "可用抽奖次数 " + chance + " 次")
                         + "\n当前情愫王：" + (senseFrom == null ? "已退群成员" : (senseFrom.getNameCard().equals("") ? senseFrom.getNick() : senseFrom.getNameCard() + "(" + senseFrom.getNick() + ")")) + " [" + hq + "%]"
                         + w
