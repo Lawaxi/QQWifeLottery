@@ -14,7 +14,7 @@ public class UserWifeReport {
     private final List<WifeReport> wives_sort_by_sense;
 
     public UserWifeReport(JSONObject[] userWives) {
-        total = userWives.length;
+        total = userWives.length; //原始
 
         HashMap<Integer, WifeReport> report = new HashMap<>();
         for (JSONObject userWife : userWives) {
@@ -29,11 +29,13 @@ public class UserWifeReport {
                 report.put(sid, new WifeReport(userWife.getStr("wife_name"), sense));
             }
         }
-        wives = new ArrayList<>(report.values());
+        wives = new ArrayList<>(report.values()); //只包含带走的
+
+        Collections.sort(wives, (w1, w2) -> Integer.compare(w2.sense, w1.sense));
         Collections.sort(wives, (w1, w2) -> Integer.compare(w2.count, w1.count));
         wives_sort_by_sense = new ArrayList<>(wives);
         Collections.sort(wives_sort_by_sense, (w1, w2) -> Integer.compare(w2.sense, w1.sense));
-        total_bring = wives.size();
+        total_bring = wives.size(); //人数 != 次数
     }
 
     public List<WifeReport> getWives() {

@@ -272,9 +272,9 @@ public class database {
                 " AND NOT EXISTS (" +
                 "   SELECT 1 FROM " + TABLE_NAME + " t2" +
                 "   WHERE t2.group_number = ?" +
+                "     AND t2.user_id != ?" +
                 "     AND t2.wife_id = " + TABLE_NAME + ".wife_id" +
                 "     AND t2.sense > " + TABLE_NAME + ".sense" +
-                "     AND t2.user_id = ?" +
                 ")";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, groupNumber);

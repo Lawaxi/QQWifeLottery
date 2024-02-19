@@ -310,9 +310,9 @@ public class WifeHandler {
                 String rt = "您的排名：1";
                 if (i != 0) {
                     for (int j = i - 1; j >= 0; j--) {
-                        JSONObject fobj = records[i];
+                        JSONObject fobj = records[j];
                         int bet = fobj.getInt("count") - obj.getInt("count");
-                        if (bet == 0) {
+                        if (bet != 0) {
                             rt = "您的排名：" + (j + 2) + "，距离上一名差(" + bet + ")";
                             break;
                         }
