@@ -3,6 +3,7 @@ package net.lawaxi.lottery.utils;
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 
+import java.util.Calendar;
 import java.util.Date;
 
 public class WifeUtil {
@@ -34,6 +35,13 @@ public class WifeUtil {
     }
 
     public static String getChangingTime(long lastTime) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        if (hour >= 6 && hour < 8) {
+            return "请等待本日早8点CD刷新";
+        }
+
         Date nextTime = DateUtil.offsetHour(new Date(lastTime), 2);
         if (new Date().getTime() - nextTime.getTime() >= 0)
             return "当前可更换";

@@ -7,6 +7,7 @@ import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.setting.Setting;
+import net.lawaxi.lottery.WifeLottery;
 import net.lawaxi.lottery.handler.PasswordHandler;
 
 import java.awt.*;
@@ -180,10 +181,10 @@ public class config {
         if (changed.get()) {
             String backupFile = starDataFile.getPath() + lastTime;
             FileUtil.writeString(originalStarData.toString(), backupFile, "UTF-8");
+            WifeLottery.INSTANCE.getLogger().info("执行成员列表数据更新，旧数据已备份至" + backupFile);
             return "已更新成员列表，当前数据总数 " + this.starData.size() + " 人"
                     + String.join("", addedMembers)
-                    + String.join("", removedMembers)
-                    + "\n旧数据已备份至" + backupFile;
+                    + String.join("", removedMembers);
         } else {
             return "成员列表已是最新，当前数据总数 " + this.starData.size() + " 人";
         }
